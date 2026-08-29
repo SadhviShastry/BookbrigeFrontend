@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Browse Books — BookBridge</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+
+<div class="app-shell">
+  <aside class="sidebar">
+    <a href="index.html" class="brand"><span class="brand-mark"><i class="fa-solid fa-book-bookmark"></i></span> BookBridge</a>
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" data-nav="dashboard.html" class="sidebar-link"><i class="fa-solid fa-gauge"></i> Dashboard</a>
+      <a href="browse.html" data-nav="browse.html" class="sidebar-link"><i class="fa-solid fa-magnifying-glass"></i> Browse Books</a>
+      <a href="wishlist.html" data-nav="wishlist.html" class="sidebar-link"><i class="fa-solid fa-heart"></i> Wishlist</a>
+      <a href="requests.html" data-nav="requests.html" class="sidebar-link"><i class="fa-solid fa-inbox"></i> Requests</a>
+      <a href="my-books.html" data-nav="my-books.html" class="sidebar-link"><i class="fa-solid fa-book"></i> My Books</a>
+      <a href="add-book.html" data-nav="add-book.html" class="sidebar-link"><i class="fa-solid fa-plus"></i> Add Book</a>
+      <a href="messages.html" data-nav="messages.html" class="sidebar-link"><i class="fa-solid fa-message"></i> Messages</a>
+      <a href="membership.html" data-nav="membership.html" class="sidebar-link"><i class="fa-solid fa-crown"></i> Membership</a>
+      <a href="events.html" data-nav="events.html" class="sidebar-link"><i class="fa-solid fa-calendar-star"></i> Events &amp; Offers</a>
+      <div class="sidebar-divider"></div>
+      <a href="profile.html" data-nav="profile.html" class="sidebar-link"><i class="fa-solid fa-user"></i> Profile</a>
+      <a href="settings.html" data-nav="settings.html" class="sidebar-link"><i class="fa-solid fa-gear"></i> Settings</a>
+      <a href="admin.html" data-nav="admin.html" class="sidebar-link" data-admin-only style="display:none;"><i class="fa-solid fa-shield-halved"></i> Admin Panel</a>
+      <a href="about.html" data-nav="about.html" class="sidebar-link"><i class="fa-solid fa-circle-info"></i> About Us</a>
+      <a href="#" class="support-link" data-donate-trigger><i class="fa-solid fa-heart"></i> Support Us</a>
+      <a href="#" class="sidebar-link" id="logoutLink"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+    </nav>
+  </aside>
+
+  <main class="app-main">
+    <div class="topbar">
+      <button class="sidebar-toggle icon-btn" aria-label="Menu"><i class="fa-solid fa-bars"></i></button>
+      <div class="search-box autocomplete-wrap" style="position:relative;">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="searchInput" placeholder="Search books, authors...">
+        <div class="autocomplete-dropdown" id="autocompleteDropdown"></div>
+      </div>
+      <div class="topbar-user">
+        <button class="theme-toggle" data-theme-toggle title="Toggle dark mode"></button>
+        <div class="notif-wrap">
+          <button class="icon-btn" id="notifBtn"><i class="fa-regular fa-bell"></i><span class="dot"></span></button>
+        </div>
+        <div class="avatar" data-user-initials>SJ</div>
+      </div>
+    </div>
+
+    <div class="page-content">
+      <h1>Browse Books</h1>
+      <p class="page-sub">Find your next read from the community catalogue</p>
+
+      <div class="filters-bar" id="categoryChips">
+        <select class="select" id="availabilityFilter" style="max-width:170px;">
+          <option value="">All Availability</option>
+          <option value="available">Available Now</option>
+          <option value="unavailable">Currently Borrowed</option>
+        </select>
+        <select class="select" id="listingTypeFilter" style="max-width:170px;">
+          <option value="">All Types</option>
+          <option value="Lend / Borrow">Borrow (Free)</option>
+          <option value="Donate">Donate (Free)</option>
+          <option value="Exchange">Exchange</option>
+          <option value="Sell">For Sale</option>
+        </select>
+        <select class="select" id="areaFilter" style="max-width:180px;">
+          <option value="">All Areas</option>
+        </select>
+        <select class="select" id="sortFilter" style="max-width:150px;">
+          <option value="latest">Sort: Latest</option>
+          <option value="rating">Sort: Top Rated</option>
+          <option value="title">Sort: Title A–Z</option>
+        </select>
+      </div>
+
+      <div class="book-grid" id="browseGrid"></div>
+      <div class="pagination" id="pagination"></div>
+    </div>
+  </main>
+</div>
+
+<script src="js/mock-data.js"></script>
+<script src="js/store.js"></script>
+<script src="js/api.js"></script>
+<script src="js/main.js"></script>
+<script>
+  // Browsing is public — only actions like Borrow/Wishlist require login.
+  if (!isLoggedIn()) {
+    document.querySelector(".topbar-user").innerHTML =
+      `<button class="theme-toggle" data-theme-toggle title="Toggle dark mode"></button><a href="login.html" class="btn btn-outline btn-sm">Login</a><a href="register.html" class="btn btn-primary btn-sm">Sign Up</a>`;
+  }
+
+  document.getElementById("browseGrid").innerHTML = skeletonCards(8);
+
+  const PAGE_SIZE = 8;
+  let currentPage = 1;
+  let allBooks = [];
+  let activeCategory = new URLSearchParams(location.search).get("category") || "";
+
+  function applyFiltersAndRender() {
+    const q = document.getElementById("searchInput").value.trim().toLowerCase();
+    const availability = document.getElementById("availabilityFilter").value;
+    const area = document.getElementById("areaFilter").value;
+    const sort = document.getElementById("sortFilter").value;
+    const listingType = document.getElementById("listingTypeFilter").value;
+
+    let filtered = allBooks.filter((b) => {
+      const matchesQuery = !q || b.title.toLowerCase().includes(q) || b.author.toLowerCase().includes(q);
+      const matchesCategory = !activeCategory || b.category === activeCategory;
+      const matchesAvailability = !availability || (availability === "available" ? b.available : !b.available);
+      const matchesArea = !area || b.ownerArea === area;
+      const matchesType = !listingType || (b.listingType || "Lend / Borrow") === listingType;
+      return matchesQuery && matchesCategory && matchesAvailability && matchesArea && matchesType;
+    });
+
+    if (sort === "rating") filtered.sort((a, b) => b.rating - a.rating);
+    if (sort === "title") filtered.sort((a, b) => a.title.localeCompare(b.title));
+
+    const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+    currentPage = Math.min(currentPage, totalPages);
+    const pageItems = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+
+    const grid = document.getElementById("browseGrid");
+    grid.innerHTML = pageItems.length
+      ? pageItems.map(bookCardHTML).join("")
+      : `<div class="empty-state" style="grid-column:1/-1;"><i class="fa-solid fa-magnifying-glass"></i><h3>No books match</h3><p>Try a different search term or filter.</p></div>`;
+
+    renderPagination(totalPages);
+  }
+
+  function renderPagination(totalPages) {
+    const el = document.getElementById("pagination");
+    if (totalPages <= 1) { el.innerHTML = ""; return; }
+    let html = `<button class="page-btn" data-page="${currentPage - 1}" ${currentPage === 1 ? "disabled" : ""}><i class="fa-solid fa-chevron-left"></i></button>`;
+    for (let i = 1; i <= totalPages; i++) {
+      html += `<button class="page-btn ${i === currentPage ? "active" : ""}" data-page="${i}">${i}</button>`;
+    }
+    html += `<button class="page-btn" data-page="${currentPage + 1}" ${currentPage === totalPages ? "disabled" : ""}><i class="fa-solid fa-chevron-right"></i></button>`;
+    el.innerHTML = html;
+    el.querySelectorAll("[data-page]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        currentPage = Number(btn.dataset.page);
+        applyFiltersAndRender();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      });
+    });
+  }
+
+  async function renderCategoryChips() {
+    const categories = await BookAPI.categories();
+    const chipsHTML = [`<button class="chip ${!activeCategory ? "active" : ""}" data-cat="">All Categories</button>`]
+      .concat(categories.map((c) => `<button class="chip ${activeCategory === c.name ? "active" : ""}" data-cat="${c.name}">${c.name}</button>`))
+      .join("");
+    document.getElementById("categoryChips").insertAdjacentHTML("afterbegin", chipsHTML);
+    document.querySelectorAll("[data-cat]").forEach((chip) => {
+      chip.addEventListener("click", () => {
+        activeCategory = chip.dataset.cat;
+        currentPage = 1;
+        document.querySelectorAll("[data-cat]").forEach((c) => c.classList.remove("active"));
+        chip.classList.add("active");
+        applyFiltersAndRender();
+      });
+    });
+  }
+
+  async function init() {
+    allBooks = await BookAPI.list();
+    await renderCategoryChips();
+    populateAreaFilter();
+    applyFiltersAndRender();
+
+    document.getElementById("searchInput").addEventListener("input", () => { currentPage = 1; applyFiltersAndRender(); handleAutocomplete(); });
+    document.getElementById("availabilityFilter").addEventListener("change", () => { currentPage = 1; applyFiltersAndRender(); });
+    document.getElementById("areaFilter").addEventListener("change", () => { currentPage = 1; applyFiltersAndRender(); });
+    document.getElementById("sortFilter").addEventListener("change", applyFiltersAndRender);
+  }
+
+  function populateAreaFilter() {
+    const areas = [...new Set(allBooks.map((b) => b.ownerArea).filter(Boolean))];
+    const sel = document.getElementById("areaFilter");
+    areas.forEach((a) => sel.insertAdjacentHTML("beforeend", `<option value="${a}">${a}</option>`));
+  }
+
+  /* ---- Search autocomplete ---- */
+  let acTimer;
+  function handleAutocomplete() {
+    clearTimeout(acTimer);
+    const dropdown = document.getElementById("autocompleteDropdown");
+    const q = document.getElementById("searchInput").value.trim();
+    if (!q) { dropdown.classList.remove("show"); return; }
+    acTimer = setTimeout(async () => {
+      const results = await BookAPI.search(q);
+      if (!results.length) { dropdown.classList.remove("show"); return; }
+      dropdown.innerHTML = results.map((b) => `
+        <a href="book-details.html?id=${b.id}" class="autocomplete-item">
+          <span class="ac-cover" style="${coverStyleAttr(b)}">${coverInnerHTML(b)}</span>
+          <span><strong>${b.title}</strong> — <span style="color:var(--brown-500);">${b.author}</span></span>
+        </a>`).join("");
+      dropdown.classList.add("show");
+    }, 200);
+  }
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest(".autocomplete-wrap")) document.getElementById("autocompleteDropdown").classList.remove("show");
+  });
+
+  init();
+</script>
+</body>
+</html>

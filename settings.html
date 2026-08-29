@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Settings — BookBridge</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+
+<div class="app-shell">
+  <aside class="sidebar">
+    <a href="index.html" class="brand"><span class="brand-mark"><i class="fa-solid fa-book-bookmark"></i></span> BookBridge</a>
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" data-nav="dashboard.html" class="sidebar-link"><i class="fa-solid fa-gauge"></i> Dashboard</a>
+      <a href="browse.html" data-nav="browse.html" class="sidebar-link"><i class="fa-solid fa-magnifying-glass"></i> Browse Books</a>
+      <a href="wishlist.html" data-nav="wishlist.html" class="sidebar-link"><i class="fa-solid fa-heart"></i> Wishlist</a>
+      <a href="requests.html" data-nav="requests.html" class="sidebar-link"><i class="fa-solid fa-inbox"></i> Requests</a>
+      <a href="my-books.html" data-nav="my-books.html" class="sidebar-link"><i class="fa-solid fa-book"></i> My Books</a>
+      <a href="add-book.html" data-nav="add-book.html" class="sidebar-link"><i class="fa-solid fa-plus"></i> Add Book</a>
+      <a href="messages.html" data-nav="messages.html" class="sidebar-link"><i class="fa-solid fa-message"></i> Messages</a>
+      <a href="membership.html" data-nav="membership.html" class="sidebar-link"><i class="fa-solid fa-crown"></i> Membership</a>
+      <a href="events.html" data-nav="events.html" class="sidebar-link"><i class="fa-solid fa-calendar-star"></i> Events &amp; Offers</a>
+      <div class="sidebar-divider"></div>
+      <a href="profile.html" data-nav="profile.html" class="sidebar-link"><i class="fa-solid fa-user"></i> Profile</a>
+      <a href="settings.html" data-nav="settings.html" class="sidebar-link"><i class="fa-solid fa-gear"></i> Settings</a>
+      <a href="admin.html" data-nav="admin.html" class="sidebar-link" data-admin-only style="display:none;"><i class="fa-solid fa-shield-halved"></i> Admin Panel</a>
+      <a href="about.html" data-nav="about.html" class="sidebar-link"><i class="fa-solid fa-circle-info"></i> About Us</a>
+      <a href="#" class="support-link" data-donate-trigger><i class="fa-solid fa-heart"></i> Support Us</a>
+      <a href="#" class="sidebar-link" id="logoutLink"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+    </nav>
+  </aside>
+
+  <main class="app-main">
+    <div class="topbar">
+      <button class="sidebar-toggle icon-btn" aria-label="Menu"><i class="fa-solid fa-bars"></i></button>
+      <div class="search-box"><i class="fa-solid fa-magnifying-glass"></i><input type="text" placeholder="Search for books, authors, categories..."></div>
+      <div class="topbar-user">
+        <button class="theme-toggle" data-theme-toggle title="Toggle dark mode"></button>
+        <div class="notif-wrap">
+          <button class="icon-btn" id="notifBtn"><i class="fa-regular fa-bell"></i><span class="dot"></span></button>
+        </div>
+        <div class="avatar" data-user-initials>SJ</div>
+      </div>
+    </div>
+
+    <div class="page-content" style="max-width:640px;">
+      <h1>Settings</h1>
+      <p class="page-sub">Manage your account preferences</p>
+
+      <div class="panel">
+        <div class="panel-head"><h3>Change Password</h3></div>
+        <div class="form-error-banner" id="pwError"></div>
+        <div class="form-error-banner show" id="pwSuccess" style="background:var(--success-bg);color:var(--success);display:none;"></div>
+        <form id="pwForm">
+          <div class="form-group"><label for="currentPw">Current Password</label><input class="input" type="password" id="currentPw" required></div>
+          <div class="form-group"><label for="newPw">New Password</label><input class="input" type="password" id="newPw" minlength="6" required><div class="pw-meter" id="pwMeterSettings"></div></div>
+          <div class="form-group"><label for="confirmPw">Confirm New Password</label><input class="input" type="password" id="confirmPw" required></div>
+          <button type="submit" class="btn btn-primary">Update Password</button>
+        </form>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><h3>Notification Preferences</h3></div>
+        <label class="checkbox-row" style="margin-bottom:14px;"><input type="checkbox" id="notifyRequests" checked> Notify me about new book requests</label><br>
+        <label class="checkbox-row" style="margin-bottom:14px;"><input type="checkbox" id="notifyMessages" checked> Notify me about new messages</label><br>
+        <label class="checkbox-row"><input type="checkbox" id="notifyDigest"> Send me a weekly community digest</label>
+        <div style="margin-top:18px;"><button class="btn btn-outline btn-sm" id="savePrefsBtn">Save Preferences</button></div>
+      </div>
+
+      <div class="panel" style="border-color:var(--danger-bg);">
+        <div class="panel-head"><h3 style="color:var(--danger);">Danger Zone</h3></div>
+        <p style="font-size:13.5px;color:var(--brown-700);margin-bottom:14px;">Deleting your account removes your listings, requests, and reviews permanently.</p>
+        <button class="btn btn-outline btn-sm" id="deleteAccountBtn" style="color:var(--danger);border-color:var(--danger-bg);">Delete My Account</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="js/mock-data.js"></script>
+<script src="js/store.js"></script>
+<script src="js/api.js"></script>
+<script src="js/main.js"></script>
+<script>
+  requireAuth();
+  wirePasswordStrength("newPw", "pwMeterSettings");
+
+  document.getElementById("pwForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const errBanner = document.getElementById("pwError");
+    const okBanner = document.getElementById("pwSuccess");
+    errBanner.classList.remove("show");
+    okBanner.style.display = "none";
+
+    const newPw = document.getElementById("newPw").value;
+    const confirmPw = document.getElementById("confirmPw").value;
+    if (newPw.length < 6) { errBanner.textContent = "New password must be at least 6 characters."; errBanner.classList.add("show"); return; }
+    if (newPw !== confirmPw) { errBanner.textContent = "New passwords do not match."; errBanner.classList.add("show"); return; }
+
+    okBanner.textContent = "Password updated successfully.";
+    okBanner.style.display = "block";
+    e.target.reset();
+  });
+
+  document.getElementById("savePrefsBtn").addEventListener("click", () => toast("Notification preferences saved."));
+
+  document.getElementById("deleteAccountBtn").addEventListener("click", () => {
+    if (confirm("This will permanently delete your account and all your data. Continue?")) {
+      AuthAPI.logout();
+      toast("Account deleted.");
+      setTimeout(() => (window.location.href = "index.html"), 800);
+    }
+  });
+</script>
+</body>
+</html>

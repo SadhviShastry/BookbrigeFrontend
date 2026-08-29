@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Add Book — BookBridge</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+
+<div class="app-shell">
+  <aside class="sidebar">
+    <a href="index.html" class="brand"><span class="brand-mark"><i class="fa-solid fa-book-bookmark"></i></span> BookBridge</a>
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" data-nav="dashboard.html" class="sidebar-link"><i class="fa-solid fa-gauge"></i> Dashboard</a>
+      <a href="browse.html" data-nav="browse.html" class="sidebar-link"><i class="fa-solid fa-magnifying-glass"></i> Browse Books</a>
+      <a href="wishlist.html" data-nav="wishlist.html" class="sidebar-link"><i class="fa-solid fa-heart"></i> Wishlist</a>
+      <a href="requests.html" data-nav="requests.html" class="sidebar-link"><i class="fa-solid fa-inbox"></i> Requests</a>
+      <a href="my-books.html" data-nav="my-books.html" class="sidebar-link"><i class="fa-solid fa-book"></i> My Books</a>
+      <a href="add-book.html" data-nav="add-book.html" class="sidebar-link"><i class="fa-solid fa-plus"></i> Add Book</a>
+      <a href="messages.html" data-nav="messages.html" class="sidebar-link"><i class="fa-solid fa-message"></i> Messages</a>
+      <a href="membership.html" data-nav="membership.html" class="sidebar-link"><i class="fa-solid fa-crown"></i> Membership</a>
+      <a href="events.html" data-nav="events.html" class="sidebar-link"><i class="fa-solid fa-calendar-star"></i> Events &amp; Offers</a>
+      <div class="sidebar-divider"></div>
+      <a href="profile.html" data-nav="profile.html" class="sidebar-link"><i class="fa-solid fa-user"></i> Profile</a>
+      <a href="settings.html" data-nav="settings.html" class="sidebar-link"><i class="fa-solid fa-gear"></i> Settings</a>
+      <a href="admin.html" data-nav="admin.html" class="sidebar-link" data-admin-only style="display:none;"><i class="fa-solid fa-shield-halved"></i> Admin Panel</a>
+      <a href="about.html" data-nav="about.html" class="sidebar-link"><i class="fa-solid fa-circle-info"></i> About Us</a>
+      <a href="#" class="support-link" data-donate-trigger><i class="fa-solid fa-heart"></i> Support Us</a>
+      <a href="#" class="sidebar-link" id="logoutLink"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+    </nav>
+  </aside>
+
+  <main class="app-main">
+    <div class="topbar">
+      <button class="sidebar-toggle icon-btn" aria-label="Menu"><i class="fa-solid fa-bars"></i></button>
+      <div class="search-box"><i class="fa-solid fa-magnifying-glass"></i><input type="text" placeholder="Search for books, authors, categories..."></div>
+      <div class="topbar-user">
+        <button class="theme-toggle" data-theme-toggle title="Toggle dark mode"></button>
+        <div class="notif-wrap">
+          <button class="icon-btn" id="notifBtn"><i class="fa-regular fa-bell"></i><span class="dot"></span></button>
+        </div>
+        <div class="avatar" data-user-initials>SJ</div>
+      </div>
+    </div>
+
+    <div class="page-content" style="max-width:760px;">
+      <h1>Add a Book</h1>
+      <p class="page-sub">Share a book from your shelf with the community</p>
+
+      <div class="panel">
+        <div class="form-error-banner" id="formError"></div>
+        <form id="addBookForm" novalidate>
+          <div class="form-grid">
+            <div class="form-group full">
+              <label for="title">Book Title</label>
+              <input class="input" id="title" placeholder="e.g. Atomic Habits" required>
+            </div>
+            <div class="form-group">
+              <label for="author">Author</label>
+              <input class="input" id="author" placeholder="e.g. James Clear" required>
+            </div>
+            <div class="form-group">
+              <label for="category">Category</label>
+              <select class="select" id="category" required></select>
+            </div>
+            <div class="form-group">
+              <label for="subcategory">Sub-category <span style="font-weight:400;color:var(--brown-500);">(optional)</span></label>
+              <input class="input" id="subcategory" placeholder="e.g. Java, Fiction, Thriller">
+            </div>
+            <div class="form-group">
+              <label for="condition">Condition</label>
+              <select class="select" id="condition" required>
+                <option value="">Select condition</option>
+                <option>New</option><option>Like New</option><option>Good</option><option>Fair</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="listingType">Listing Type</label>
+              <select class="select" id="listingType">
+                <option>Lend / Borrow</option><option>Exchange</option><option>Donate</option><option>Sell</option>
+              </select>
+            </div>
+            <div class="form-group" id="priceGroup" style="display:none;">
+              <label for="price">Price (₹)</label>
+              <input class="input" type="number" id="price" min="1" placeholder="e.g. 250">
+            </div>
+            <div class="form-group full">
+              <label for="desc">Description</label>
+              <textarea class="input" id="desc" placeholder="What's it about? Why are you sharing it?" required></textarea>
+            </div>
+            <div class="form-group full">
+              <label>Book Cover Photo</label>
+              <div id="uploadBoxWrap">
+                <div class="image-upload-box" id="uploadBox">
+                  <input type="file" id="coverImageInput" accept="image/*">
+                  <i class="fa-solid fa-cloud-arrow-up"></i>
+                  <p>Click to upload a photo (JPG/PNG, under 2MB) — optional</p>
+                </div>
+              </div>
+            </div>
+            <div class="form-group full">
+              <label>Or pick a cover color <span style="font-weight:400;color:var(--brown-500);">(used if you don't upload a photo)</span></label>
+              <div class="swatch-row" id="swatchRow"></div>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary" id="submitBtn" style="margin-top:8px;">List This Book</button>
+        </form>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="js/mock-data.js"></script>
+<script src="js/store.js"></script>
+<script src="js/api.js"></script>
+<script src="js/main.js"></script>
+<script>
+  requireAuth();
+
+  (async function loadCategories() {
+    const cats = await CategoryAPI.list();
+    const sel = document.getElementById("category");
+    sel.innerHTML = `<option value="">Select category</option>` + cats.map((c) => `<option>${c.name}</option>`).join("");
+  })();
+
+  document.getElementById("listingType").addEventListener("change", (e) => {
+    document.getElementById("priceGroup").style.display = e.target.value === "Sell" ? "" : "none";
+  });
+
+  let uploadedImage = null;
+
+  function handleImageFile(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) { toast("Please choose an image file.", "error"); return; }
+    if (file.size > 2 * 1024 * 1024) { toast("Image must be under 2MB.", "error"); return; }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      uploadedImage = reader.result; // base64 data URL — good enough for the demo Store
+      document.getElementById("uploadBoxWrap").innerHTML = `
+        <div class="image-preview-wrap">
+          <img src="${uploadedImage}" class="image-preview" alt="Cover preview">
+          <div>
+            <p style="font-size:13.5px;font-weight:600;margin-bottom:6px;">${file.name}</p>
+            <button type="button" class="btn btn-outline btn-sm" id="removeImageBtn">Remove Photo</button>
+          </div>
+        </div>`;
+      document.getElementById("removeImageBtn").addEventListener("click", resetImageUpload);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function resetImageUpload() {
+    uploadedImage = null;
+    document.getElementById("uploadBoxWrap").innerHTML = `
+      <div class="image-upload-box" id="uploadBox">
+        <input type="file" id="coverImageInput" accept="image/*">
+        <i class="fa-solid fa-cloud-arrow-up"></i>
+        <p>Click to upload a photo (JPG/PNG, under 2MB) — optional</p>
+      </div>`;
+    document.getElementById("coverImageInput").addEventListener("change", handleImageFile);
+  }
+
+  document.getElementById("coverImageInput").addEventListener("change", handleImageFile);
+
+  const swatchRow = document.getElementById("swatchRow");
+  let selectedSwatch = 0;
+  COVER_PALETTE.forEach((pair, i) => {
+    const el = document.createElement("div");
+    el.className = "swatch" + (i === 0 ? " active" : "");
+    el.style.background = `linear-gradient(155deg, ${pair[0]}, ${pair[1]})`;
+    el.dataset.swatch = i;
+    el.addEventListener("click", () => {
+      selectedSwatch = i;
+      swatchRow.querySelectorAll(".swatch").forEach((s) => s.classList.remove("active"));
+      el.classList.add("active");
+    });
+    swatchRow.appendChild(el);
+  });
+
+  document.getElementById("addBookForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const banner = document.getElementById("formError");
+    banner.classList.remove("show");
+
+    const payload = {
+      title: document.getElementById("title").value.trim(),
+      author: document.getElementById("author").value.trim(),
+      category: document.getElementById("category").value,
+      subcategory: document.getElementById("subcategory").value.trim(),
+      condition: document.getElementById("condition").value,
+      listingType: document.getElementById("listingType").value,
+      price: document.getElementById("price").value,
+      desc: document.getElementById("desc").value.trim(),
+      imageUrl: uploadedImage,
+    };
+
+    if (!payload.title || !payload.author || !payload.category || !payload.condition || !payload.desc) {
+      banner.textContent = "Please fill in all required fields.";
+      banner.classList.add("show");
+      return;
+    }
+    if (payload.listingType === "Sell" && (!payload.price || Number(payload.price) <= 0)) {
+      banner.textContent = "Please enter a valid price for a book you're selling.";
+      banner.classList.add("show");
+      return;
+    }
+
+    const btn = document.getElementById("submitBtn");
+    btn.disabled = true;
+    btn.textContent = "Listing…";
+    try {
+      const book = await BookAPI.create(payload);
+      toast("Book listed successfully!");
+      setTimeout(() => (window.location.href = `book-details.html?id=${book.id}`), 500);
+    } catch (err) {
+      banner.textContent = err.message;
+      banner.classList.add("show");
+      btn.disabled = false;
+      btn.textContent = "List This Book";
+    }
+  });
+</script>
+</body>
+</html>

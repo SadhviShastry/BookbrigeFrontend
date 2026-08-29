@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wishlist — BookBridge</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+
+<div class="app-shell">
+  <aside class="sidebar">
+    <a href="index.html" class="brand"><span class="brand-mark"><i class="fa-solid fa-book-bookmark"></i></span> BookBridge</a>
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" data-nav="dashboard.html" class="sidebar-link"><i class="fa-solid fa-gauge"></i> Dashboard</a>
+      <a href="browse.html" data-nav="browse.html" class="sidebar-link"><i class="fa-solid fa-magnifying-glass"></i> Browse Books</a>
+      <a href="wishlist.html" data-nav="wishlist.html" class="sidebar-link"><i class="fa-solid fa-heart"></i> Wishlist</a>
+      <a href="requests.html" data-nav="requests.html" class="sidebar-link"><i class="fa-solid fa-inbox"></i> Requests</a>
+      <a href="my-books.html" data-nav="my-books.html" class="sidebar-link"><i class="fa-solid fa-book"></i> My Books</a>
+      <a href="add-book.html" data-nav="add-book.html" class="sidebar-link"><i class="fa-solid fa-plus"></i> Add Book</a>
+      <a href="messages.html" data-nav="messages.html" class="sidebar-link"><i class="fa-solid fa-message"></i> Messages</a>
+      <a href="membership.html" data-nav="membership.html" class="sidebar-link"><i class="fa-solid fa-crown"></i> Membership</a>
+      <a href="events.html" data-nav="events.html" class="sidebar-link"><i class="fa-solid fa-calendar-star"></i> Events &amp; Offers</a>
+      <div class="sidebar-divider"></div>
+      <a href="profile.html" data-nav="profile.html" class="sidebar-link"><i class="fa-solid fa-user"></i> Profile</a>
+      <a href="settings.html" data-nav="settings.html" class="sidebar-link"><i class="fa-solid fa-gear"></i> Settings</a>
+      <a href="admin.html" data-nav="admin.html" class="sidebar-link" data-admin-only style="display:none;"><i class="fa-solid fa-shield-halved"></i> Admin Panel</a>
+      <a href="about.html" data-nav="about.html" class="sidebar-link"><i class="fa-solid fa-circle-info"></i> About Us</a>
+      <a href="#" class="support-link" data-donate-trigger><i class="fa-solid fa-heart"></i> Support Us</a>
+      <a href="#" class="sidebar-link" id="logoutLink"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+    </nav>
+  </aside>
+
+  <main class="app-main">
+    <div class="topbar">
+      <button class="sidebar-toggle icon-btn" aria-label="Menu"><i class="fa-solid fa-bars"></i></button>
+      <div class="search-box"><i class="fa-solid fa-magnifying-glass"></i><input type="text" placeholder="Search for books, authors, categories..."></div>
+      <div class="topbar-user">
+        <button class="theme-toggle" data-theme-toggle title="Toggle dark mode"></button>
+        <div class="notif-wrap">
+          <button class="icon-btn" id="notifBtn"><i class="fa-regular fa-bell"></i><span class="dot"></span></button>
+        </div>
+        <div class="avatar" data-user-initials>SJ</div>
+      </div>
+    </div>
+
+    <div class="page-content">
+      <h1>My Wishlist</h1>
+      <p class="page-sub">Books you're keeping an eye on</p>
+      <div class="book-grid" id="wishlistGrid"></div>
+    </div>
+  </main>
+</div>
+
+<script src="js/mock-data.js"></script>
+<script src="js/store.js"></script>
+<script src="js/api.js"></script>
+<script src="js/main.js"></script>
+<script>
+  requireAuth();
+
+  function wishlistCardHTML(book) {
+    return `
+      <article class="book-card">
+        <a href="book-details.html?id=${book.id}" class="book-cover" style="${coverStyleAttr(book)}">${coverInnerHTML(book, true)}</a>
+        <div class="book-body">
+          <span class="availability-tag ${book.available ? "" : "unavailable"}">${book.available ? "Available" : "Borrowed"}</span>
+          <a href="book-details.html?id=${book.id}" class="book-title">${book.title}</a>
+          <div class="book-author">${book.author}</div>
+          <div class="book-rating">${starRating(book.rating || 0)} ${book.rating || "—"}</div>
+          <button class="btn btn-outline btn-block btn-sm" data-remove-wishlist="${book.id}"><i class="fa-solid fa-heart-crack"></i> Remove</button>
+        </div>
+      </article>`;
+  }
+
+  async function render() {
+    const books = await WishlistAPI.list();
+    const grid = document.getElementById("wishlistGrid");
+    grid.innerHTML = books.length
+      ? books.map(wishlistCardHTML).join("")
+      : `<div class="empty-state" style="grid-column:1/-1;"><i class="fa-regular fa-heart"></i><h3>Your wishlist is empty</h3><p>Save books you're interested in and find them here later.</p><a href="browse.html" class="btn btn-primary" style="margin-top:16px;">Browse Books</a></div>`;
+  }
+
+  document.addEventListener("click", async (e) => {
+    const btn = e.target.closest("[data-remove-wishlist]");
+    if (!btn) return;
+    try {
+      await WishlistAPI.toggle(btn.dataset.removeWishlist);
+      toast("Removed from wishlist.");
+      render();
+    } catch (err) { toast(err.message, "error"); }
+  });
+
+  render();
+</script>
+</body>
+</html>

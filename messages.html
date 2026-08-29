@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Messages — BookBridge</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+
+<div class="app-shell">
+  <aside class="sidebar">
+    <a href="index.html" class="brand"><span class="brand-mark"><i class="fa-solid fa-book-bookmark"></i></span> BookBridge</a>
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" data-nav="dashboard.html" class="sidebar-link"><i class="fa-solid fa-gauge"></i> Dashboard</a>
+      <a href="browse.html" data-nav="browse.html" class="sidebar-link"><i class="fa-solid fa-magnifying-glass"></i> Browse Books</a>
+      <a href="wishlist.html" data-nav="wishlist.html" class="sidebar-link"><i class="fa-solid fa-heart"></i> Wishlist</a>
+      <a href="requests.html" data-nav="requests.html" class="sidebar-link"><i class="fa-solid fa-inbox"></i> Requests</a>
+      <a href="my-books.html" data-nav="my-books.html" class="sidebar-link"><i class="fa-solid fa-book"></i> My Books</a>
+      <a href="add-book.html" data-nav="add-book.html" class="sidebar-link"><i class="fa-solid fa-plus"></i> Add Book</a>
+      <a href="messages.html" data-nav="messages.html" class="sidebar-link"><i class="fa-solid fa-message"></i> Messages</a>
+      <a href="membership.html" data-nav="membership.html" class="sidebar-link"><i class="fa-solid fa-crown"></i> Membership</a>
+      <a href="events.html" data-nav="events.html" class="sidebar-link"><i class="fa-solid fa-calendar-star"></i> Events &amp; Offers</a>
+      <div class="sidebar-divider"></div>
+      <a href="profile.html" data-nav="profile.html" class="sidebar-link"><i class="fa-solid fa-user"></i> Profile</a>
+      <a href="settings.html" data-nav="settings.html" class="sidebar-link"><i class="fa-solid fa-gear"></i> Settings</a>
+      <a href="admin.html" data-nav="admin.html" class="sidebar-link" data-admin-only style="display:none;"><i class="fa-solid fa-shield-halved"></i> Admin Panel</a>
+      <a href="about.html" data-nav="about.html" class="sidebar-link"><i class="fa-solid fa-circle-info"></i> About Us</a>
+      <a href="#" class="support-link" data-donate-trigger><i class="fa-solid fa-heart"></i> Support Us</a>
+      <a href="#" class="sidebar-link" id="logoutLink"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+    </nav>
+  </aside>
+
+  <main class="app-main">
+    <div class="topbar">
+      <button class="sidebar-toggle icon-btn" aria-label="Menu"><i class="fa-solid fa-bars"></i></button>
+      <div class="search-box"><i class="fa-solid fa-magnifying-glass"></i><input type="text" placeholder="Search conversations..."></div>
+      <div class="topbar-user">
+        <button class="theme-toggle" data-theme-toggle title="Toggle dark mode"></button>
+        <div class="notif-wrap">
+          <button class="icon-btn" id="notifBtn"><i class="fa-regular fa-bell"></i><span class="dot"></span></button>
+        </div>
+        <div class="avatar" data-user-initials>SJ</div>
+      </div>
+    </div>
+
+    <div class="page-content">
+      <h1>Messages</h1>
+      <p class="page-sub">Coordinate handovers and ask questions before you borrow</p>
+
+      <div class="chat-shell">
+        <div class="thread-list" id="threadList"></div>
+        <div class="chat-panel">
+          <div class="chat-header" id="chatHeader">Select a conversation</div>
+          <div class="chat-body" id="chatBody"></div>
+          <div class="chat-input-row" id="chatInputRow" style="display:none;">
+            <input class="input" id="chatInput" placeholder="Type a message...">
+            <button class="btn btn-primary" id="sendBtn"><i class="fa-solid fa-paper-plane"></i></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="js/mock-data.js"></script>
+<script src="js/store.js"></script>
+<script src="js/api.js"></script>
+<script src="js/main.js"></script>
+<script>
+  requireAuth();
+  let activeThreadId = new URLSearchParams(location.search).get("thread");
+  const me = getCurrentUser();
+
+  async function renderThreads() {
+    const threads = await MessageAPI.threads();
+    const list = document.getElementById("threadList");
+
+    if (!threads.length) {
+      list.innerHTML = `<div class="empty-state"><i class="fa-regular fa-comments"></i><p>No conversations yet. Message a book owner from a book's details page to start one.</p></div>`;
+      return;
+    }
+    if (!activeThreadId) activeThreadId = String(threads[0].id);
+
+    list.innerHTML = threads.map((t) => `
+      <div class="thread-item ${String(t.id) === String(activeThreadId) ? "active" : ""}" data-thread="${t.id}">
+        <div class="avatar">${(t.otherUser.name || "?").slice(0, 2).toUpperCase()}</div>
+        <div>
+          <div class="thread-name">${t.otherUser.name || "Unknown"}</div>
+          <div class="thread-preview">${t.book ? t.book.title : ""} ${t.lastMessage ? "— " + t.lastMessage : ""}</div>
+        </div>
+      </div>`).join("");
+
+    if (activeThreadId) openThread(activeThreadId, threads);
+  }
+
+  async function openThread(threadId, threads) {
+    activeThreadId = String(threadId);
+    document.querySelectorAll(".thread-item").forEach((el) => el.classList.toggle("active", el.dataset.thread === activeThreadId));
+
+    const thread = threads.find((t) => String(t.id) === activeThreadId);
+    document.getElementById("chatHeader").textContent = thread ? `${thread.otherUser.name} — ${thread.book ? thread.book.title : ""}` : "Conversation";
+    document.getElementById("chatInputRow").style.display = "flex";
+
+    const messages = await MessageAPI.messages(threadId);
+    const body = document.getElementById("chatBody");
+    body.innerHTML = messages.length
+      ? messages.map((m) => `<div class="chat-bubble ${m.senderId === me.id ? "mine" : "theirs"}">${m.text}</div>`).join("")
+      : `<p style="color:var(--brown-500);font-size:13px;">Say hello 👋 — ask about pickup time or book condition.</p>`;
+    body.scrollTop = body.scrollHeight;
+  }
+
+  document.addEventListener("click", async (e) => {
+    const item = e.target.closest("[data-thread]");
+    if (item) {
+      const threads = await MessageAPI.threads();
+      openThread(item.dataset.thread, threads);
+    }
+  });
+
+  document.getElementById("sendBtn").addEventListener("click", sendMessage);
+  document.getElementById("chatInput").addEventListener("keydown", (e) => { if (e.key === "Enter") sendMessage(); });
+
+  async function sendMessage() {
+    const input = document.getElementById("chatInput");
+    const text = input.value.trim();
+    if (!text || !activeThreadId) return;
+    input.value = "";
+    try {
+      await MessageAPI.send(activeThreadId, text);
+      const threads = await MessageAPI.threads();
+      renderThreads();
+    } catch (err) { toast(err.message, "error"); }
+  }
+
+  renderThreads();
+</script>
+</body>
+</html>

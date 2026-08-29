@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Book Details — BookBridge</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+
+<div class="app-shell">
+  <aside class="sidebar">
+    <a href="index.html" class="brand"><span class="brand-mark"><i class="fa-solid fa-book-bookmark"></i></span> BookBridge</a>
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" data-nav="dashboard.html" class="sidebar-link"><i class="fa-solid fa-gauge"></i> Dashboard</a>
+      <a href="browse.html" data-nav="browse.html" class="sidebar-link"><i class="fa-solid fa-magnifying-glass"></i> Browse Books</a>
+      <a href="wishlist.html" data-nav="wishlist.html" class="sidebar-link"><i class="fa-solid fa-heart"></i> Wishlist</a>
+      <a href="requests.html" data-nav="requests.html" class="sidebar-link"><i class="fa-solid fa-inbox"></i> Requests</a>
+      <a href="my-books.html" data-nav="my-books.html" class="sidebar-link"><i class="fa-solid fa-book"></i> My Books</a>
+      <a href="add-book.html" data-nav="add-book.html" class="sidebar-link"><i class="fa-solid fa-plus"></i> Add Book</a>
+      <a href="messages.html" data-nav="messages.html" class="sidebar-link"><i class="fa-solid fa-message"></i> Messages</a>
+      <a href="membership.html" data-nav="membership.html" class="sidebar-link"><i class="fa-solid fa-crown"></i> Membership</a>
+      <a href="events.html" data-nav="events.html" class="sidebar-link"><i class="fa-solid fa-calendar-star"></i> Events &amp; Offers</a>
+      <div class="sidebar-divider"></div>
+      <a href="profile.html" data-nav="profile.html" class="sidebar-link"><i class="fa-solid fa-user"></i> Profile</a>
+      <a href="settings.html" data-nav="settings.html" class="sidebar-link"><i class="fa-solid fa-gear"></i> Settings</a>
+      <a href="admin.html" data-nav="admin.html" class="sidebar-link" data-admin-only style="display:none;"><i class="fa-solid fa-shield-halved"></i> Admin Panel</a>
+      <a href="about.html" data-nav="about.html" class="sidebar-link"><i class="fa-solid fa-circle-info"></i> About Us</a>
+      <a href="#" class="support-link" data-donate-trigger><i class="fa-solid fa-heart"></i> Support Us</a>
+      <a href="#" class="sidebar-link" id="logoutLink"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+    </nav>
+  </aside>
+
+  <main class="app-main">
+    <div class="topbar">
+      <button class="sidebar-toggle icon-btn" aria-label="Menu"><i class="fa-solid fa-bars"></i></button>
+      <a href="browse.html" class="btn btn-ghost btn-sm"><i class="fa-solid fa-arrow-left"></i> Back to Browse</a>
+      <div class="topbar-user">
+        <button class="theme-toggle" data-theme-toggle title="Toggle dark mode"></button>
+        <div class="notif-wrap">
+          <button class="icon-btn" id="notifBtn"><i class="fa-regular fa-bell"></i><span class="dot"></span></button>
+        </div>
+        <div class="avatar" data-user-initials>SJ</div>
+      </div>
+    </div>
+
+    <div class="page-content" id="detailsContent"></div>
+  </main>
+</div>
+
+<script src="js/mock-data.js"></script>
+<script src="js/store.js"></script>
+<script src="js/api.js"></script>
+<script src="js/main.js"></script>
+<script>
+  // Viewing book details and reviews is public — actions require login.
+  if (!isLoggedIn()) {
+    document.querySelector(".topbar-user").innerHTML =
+      `<a href="login.html" class="btn btn-outline btn-sm">Login</a><a href="register.html" class="btn btn-primary btn-sm">Sign Up</a>`;
+  }
+  const bookId = new URLSearchParams(location.search).get("id") || 1;
+  let currentBook = null;
+
+  function reviewItemHTML(r) {
+    return `
+      <div class="review-item">
+        <div class="avatar" style="flex-shrink:0;">${r.userName.split(" ").map((w) => w[0]).slice(0, 2).join("")}</div>
+        <div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <strong style="font-size:14px;">${r.userName}</strong>
+            <span style="font-size:12.5px;color:var(--brown-500);">${r.date}</span>
+          </div>
+          <div class="book-rating" style="margin:3px 0 6px;">${starRating(r.rating)}</div>
+          <p style="font-size:14px;color:var(--brown-700);">${r.text}</p>
+        </div>
+      </div>`;
+  }
+
+  async function renderReviews() {
+    const reviews = await ReviewAPI.forBook(bookId);
+    document.getElementById("reviewsList").innerHTML = reviews.length
+      ? reviews.map(reviewItemHTML).join("")
+      : `<p style="color:var(--brown-500);">No reviews yet — be the first to borrow and review this book.</p>`;
+  }
+
+  async function renderDetails() {
+    const book = await BookAPI.getById(bookId);
+    if (!book) { document.getElementById("detailsContent").innerHTML = `<p>Book not found.</p>`; return; }
+    currentBook = book;
+
+    const wishlisted = isLoggedIn() ? await WishlistAPI.isWishlisted(bookId) : false;
+    const me = getCurrentUser();
+    const isOwner = me && book.ownerId === me.id;
+
+    document.getElementById("detailsContent").innerHTML = `
+      <div class="details-grid">
+        <div>
+          <div class="details-cover" style="${coverStyleAttr(book)}">${coverInnerHTML(book, true)}</div>
+        </div>
+        <div>
+          <span class="availability-tag ${book.available ? "" : "unavailable"}">${book.available ? "Available" : "Currently Borrowed"}</span>
+          ${book.listingType === "Sell" ? `<span class="listing-tag sell" style="position:static;display:inline-flex;margin-left:8px;">For Sale</span>` : ""}
+          <h1 style="margin-top:10px;">${book.title}</h1>
+          <p class="page-sub" style="margin-bottom:0;">${book.author}</p>
+          ${book.listingType === "Sell" ? `<div class="price-tag" style="margin:8px 0;">₹${book.price || 0}</div>` : ""}
+          <div class="details-meta-row">
+            <div class="book-rating">${starRating(book.rating || 0)} ${book.rating || "No ratings yet"} ${book.reviews ? `(${book.reviews} reviews)` : ""}</div>
+          </div>
+          <p style="max-width:560px;color:var(--brown-700);">${book.desc || ""}</p>
+
+          <div class="details-list">
+            <div><div class="label">Category</div><div class="value">${book.category}</div></div>
+            <div><div class="label">Condition</div><div class="value">${book.condition}</div></div>
+            <div><div class="label">Owner</div><div class="value">${book.owner}</div></div>
+            <div><div class="label">Status</div><div class="value">${book.available ? "Ready to borrow" : "Awaiting return"}</div></div>
+          </div>
+
+          <div class="details-actions">
+            ${isOwner
+              ? `<span class="chip">This is your listing</span>`
+              : `<button class="btn btn-primary" data-request-book="${book.id}" ${book.available ? "" : "disabled"}>${book.available ? (book.listingType === "Sell" ? "Buy Now" : "Request Book") : "Currently Unavailable"}</button>
+                 <button class="btn btn-outline" id="messageOwnerBtn"><i class="fa-regular fa-comment-dots"></i> Message Owner</button>`}
+            <button class="btn btn-outline" id="wishlistBtn"><i class="fa-${wishlisted ? "solid" : "regular"} fa-heart" style="color:${wishlisted ? "var(--terracotta)" : ""}"></i> ${wishlisted ? "In Wishlist" : "Add to Wishlist"}</button>
+          </div>
+          <div id="myAcceptedInfo"></div>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-top:36px;">
+        <div class="panel-head"><h3>Book Reviews</h3></div>
+        <div id="reviewsList"></div>
+
+        <div class="sidebar-divider" style="margin:22px 0;"></div>
+
+        <h4 style="font-size:15px;margin-bottom:12px;">Leave a Review</h4>
+        <div class="form-error-banner" id="reviewError"></div>
+        <div class="form-group">
+          <label>Your Rating</label>
+          <div class="star-input" id="starInput">
+            ${[1,2,3,4,5].map((n) => `<i class="fa-solid fa-star" data-star="${n}"></i>`).join("")}
+          </div>
+        </div>
+        <div class="form-group">
+          <textarea class="input" id="reviewText" placeholder="Share your experience with this book or exchange..."></textarea>
+        </div>
+        <button class="btn btn-primary" id="submitReviewBtn">Submit Review</button>
+      </div>
+    `;
+
+    renderReviews();
+    renderMyAcceptedInfo(book.id);
+
+    document.getElementById("wishlistBtn").addEventListener("click", async (e) => {
+      if (!isLoggedIn()) { toast("Please log in to use your wishlist.", "error"); setTimeout(() => (window.location.href = "login.html"), 800); return; }
+      e.currentTarget.disabled = true;
+      try {
+        const { added } = await WishlistAPI.toggle(book.id);
+        toast(added ? "Added to your wishlist!" : "Removed from wishlist.");
+        renderDetails();
+      } catch (err) {
+        toast(err.message, "error");
+        e.currentTarget.disabled = false;
+      }
+    });
+
+    const msgBtn = document.getElementById("messageOwnerBtn");
+    if (msgBtn) {
+      msgBtn.addEventListener("click", async () => {
+        if (!isLoggedIn()) { toast("Please log in to message the owner.", "error"); setTimeout(() => (window.location.href = "login.html"), 800); return; }
+        try {
+          const threadId = await MessageAPI.startThread(book.ownerId, book.id);
+          window.location.href = `messages.html?thread=${threadId}`;
+        } catch (err) {
+          toast(err.message, "error");
+        }
+      });
+    }
+  }
+
+  async function renderMyAcceptedInfo(bookId) {
+    const el = document.getElementById("myAcceptedInfo");
+    if (!el || !isLoggedIn()) return;
+    const myRequests = await RequestAPI.myRequests();
+    const accepted = myRequests.find((r) => String(r.bookId) === String(bookId) && r.status === "Accepted");
+    if (!accepted) { el.innerHTML = ""; return; }
+    el.innerHTML = `
+      <div class="contact-reveal">
+        <strong style="font-size:13.5px;">${accepted.isPurchase ? "Purchase" : "Borrow"} Confirmed — Contact & Delivery</strong>
+        <div class="row"><span class="label">Owner</span><span>${accepted.ownerName} · ${accepted.ownerPhone}</span></div>
+        <div class="row"><span class="label">Due Date</span><span>${accepted.dueDate ? new Date(accepted.dueDate).toLocaleDateString() : "—"}</span></div>
+        ${accepted.isPurchase ? `<div class="row"><span class="label">Price</span><span>₹${accepted.price || 0}</span></div>
+        <div class="row"><span class="label">Payment</span><span>${accepted.paymentMethod || "—"}</span></div>` : ""}
+        <div class="row"><span class="label">Delivery Status</span><span>${accepted.deliveryStatus || "Awaiting Pickup"}</span></div>
+      </div>`;
+  }
+
+  let selectedStars = 0;
+  document.addEventListener("click", (e) => {
+    const star = e.target.closest("#starInput i");
+    if (!star) return;
+    selectedStars = Number(star.dataset.star);
+    document.querySelectorAll("#starInput i").forEach((s) => s.classList.toggle("active", Number(s.dataset.star) <= selectedStars));
+  });
+
+  document.addEventListener("click", async (e) => {
+    if (e.target.id !== "submitReviewBtn") return;
+    if (!isLoggedIn()) { toast("Please log in to leave a review.", "error"); setTimeout(() => (window.location.href = "login.html"), 800); return; }
+    const banner = document.getElementById("reviewError");
+    const text = document.getElementById("reviewText").value.trim();
+    banner.classList.remove("show");
+
+    if (selectedStars === 0) { banner.textContent = "Please select a star rating."; banner.classList.add("show"); return; }
+    if (text.length < 5) { banner.textContent = "Please write a short review (at least 5 characters)."; banner.classList.add("show"); return; }
+
+    e.target.disabled = true;
+    e.target.textContent = "Submitting…";
+    try {
+      await ReviewAPI.create(bookId, { rating: selectedStars, text });
+      toast("Thanks for your review!");
+      celebrate();
+      selectedStars = 0;
+      document.getElementById("reviewText").value = "";
+      document.querySelectorAll("#starInput i").forEach((s) => s.classList.remove("active"));
+      renderReviews();
+      const b = await BookAPI.getById(bookId);
+      currentBook = b;
+    } catch (err) {
+      banner.textContent = err.message;
+      banner.classList.add("show");
+    } finally {
+      e.target.disabled = false;
+      e.target.textContent = "Submit Review";
+    }
+  });
+
+  renderDetails();
+</script>
+</body>
+</html>

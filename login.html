@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login — BookBridge</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+
+<div class="auth-wrap">
+  <div class="auth-art">
+    <div class="book-icons">
+      <i class="fa-solid fa-book"></i>
+      <i class="fa-solid fa-book-bookmark"></i>
+      <i class="fa-solid fa-feather"></i>
+    </div>
+    <div class="floaty f1"></div>
+    <div class="floaty f2"></div>
+    <div class="floaty f3"></div>
+    <div class="quote">
+      "A reader lives a thousand lives before he dies."
+      <span>— Join a community of 800+ active readers on BookBridge</span>
+    </div>
+  </div>
+
+  <div class="auth-panel">
+    <div class="auth-box">
+      <a href="index.html" class="brand"><span class="brand-mark"><i class="fa-solid fa-book-bookmark"></i></span> BookBridge</a>
+      <h1>Welcome Back!</h1>
+      <p class="sub">Login to continue your journey</p>
+
+      <div class="role-tabs">
+        <button type="button" class="role-tab active" data-role="user">User Login</button>
+        <button type="button" class="role-tab" data-role="admin">Admin Login</button>
+      </div>
+
+      <div class="form-error-banner" id="loginError"></div>
+
+      <form id="loginForm" novalidate>
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input class="input" type="email" id="email" name="email" placeholder="youremail@example.com" required>
+          <div class="field-error" id="emailError">Please enter a valid email address.</div>
+        </div>
+
+        <div class="form-group">
+          <div class="form-row">
+            <label for="password" style="margin-bottom:0;">Password</label>
+            <a href="forgot-password.html" class="link-accent" style="font-size:13px;">Forgot Password?</a>
+          </div>
+          <div class="input-wrap">
+            <input class="input" type="password" id="password" name="password" placeholder="••••••••" required minlength="6">
+            <button type="button" class="toggle-visibility" data-toggle-for="password"><i class="fa-regular fa-eye"></i></button>
+          </div>
+          <div class="field-error" id="passwordError">Password must be at least 6 characters.</div>
+        </div>
+
+        <div class="form-row" style="margin-bottom:22px;">
+          <label class="checkbox-row"><input type="checkbox" id="remember"> Remember Me</label>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block" id="loginBtn">Login</button>
+      </form>
+
+      <p class="auth-footer" id="registerLine">Don't have an account? <a href="register.html" class="link-accent">Register</a></p>
+    </div>
+  </div>
+</div>
+
+<script src="js/mock-data.js"></script>
+<script src="js/store.js"></script>
+<script src="js/api.js"></script>
+<script src="js/main.js"></script>
+<script>
+  let selectedRole = "user";
+
+  document.querySelectorAll(".role-tab").forEach((tab) => {
+    tab.addEventListener("click", () => {
+      document.querySelectorAll(".role-tab").forEach((t) => t.classList.remove("active"));
+      tab.classList.add("active");
+      selectedRole = tab.dataset.role;
+      document.getElementById("registerLine").style.display = selectedRole === "admin" ? "none" : "";
+    });
+  });
+
+  document.querySelectorAll("[data-toggle-for]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const input = document.getElementById(btn.dataset.toggleFor);
+      const icon = btn.querySelector("i");
+      const show = input.type === "password";
+      input.type = show ? "text" : "password";
+      icon.className = show ? "fa-regular fa-eye-slash" : "fa-regular fa-eye";
+    });
+  });
+
+  function validEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
+
+  document.getElementById("loginForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
+    const emailErr = document.getElementById("emailError");
+    const passErr = document.getElementById("passwordError");
+    const banner = document.getElementById("loginError");
+
+    emailErr.classList.remove("show");
+    passErr.classList.remove("show");
+    banner.classList.remove("show");
+
+    let valid = true;
+    if (!validEmail(email)) { emailErr.classList.add("show"); valid = false; }
+    if (password.length < 6) { passErr.classList.add("show"); valid = false; }
+    if (!valid) return;
+
+    const btn = document.getElementById("loginBtn");
+    btn.disabled = true;
+    btn.textContent = "Logging in…";
+
+    try {
+      const result = await AuthAPI.login({ email, password, role: selectedRole });
+      setSession(result.token, result.user);
+      toast(`Welcome back, ${result.user.name.split(" ")[0]}!`);
+      setTimeout(() => (window.location.href = result.user.role === "admin" ? "admin.html" : "dashboard.html"), 500);
+    } catch (err) {
+      banner.textContent = err.message || "Invalid email or password.";
+      banner.classList.add("show");
+      btn.disabled = false;
+      btn.textContent = "Login";
+    }
+  });
+</script>
+</body>
+</html>

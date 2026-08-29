@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Books — BookBridge</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+
+<div class="app-shell">
+  <aside class="sidebar">
+    <a href="index.html" class="brand"><span class="brand-mark"><i class="fa-solid fa-book-bookmark"></i></span> BookBridge</a>
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" data-nav="dashboard.html" class="sidebar-link"><i class="fa-solid fa-gauge"></i> Dashboard</a>
+      <a href="browse.html" data-nav="browse.html" class="sidebar-link"><i class="fa-solid fa-magnifying-glass"></i> Browse Books</a>
+      <a href="wishlist.html" data-nav="wishlist.html" class="sidebar-link"><i class="fa-solid fa-heart"></i> Wishlist</a>
+      <a href="requests.html" data-nav="requests.html" class="sidebar-link"><i class="fa-solid fa-inbox"></i> Requests</a>
+      <a href="my-books.html" data-nav="my-books.html" class="sidebar-link"><i class="fa-solid fa-book"></i> My Books</a>
+      <a href="add-book.html" data-nav="add-book.html" class="sidebar-link"><i class="fa-solid fa-plus"></i> Add Book</a>
+      <a href="messages.html" data-nav="messages.html" class="sidebar-link"><i class="fa-solid fa-message"></i> Messages</a>
+      <a href="membership.html" data-nav="membership.html" class="sidebar-link"><i class="fa-solid fa-crown"></i> Membership</a>
+      <a href="events.html" data-nav="events.html" class="sidebar-link"><i class="fa-solid fa-calendar-star"></i> Events &amp; Offers</a>
+      <div class="sidebar-divider"></div>
+      <a href="profile.html" data-nav="profile.html" class="sidebar-link"><i class="fa-solid fa-user"></i> Profile</a>
+      <a href="settings.html" data-nav="settings.html" class="sidebar-link"><i class="fa-solid fa-gear"></i> Settings</a>
+      <a href="admin.html" data-nav="admin.html" class="sidebar-link" data-admin-only style="display:none;"><i class="fa-solid fa-shield-halved"></i> Admin Panel</a>
+      <a href="about.html" data-nav="about.html" class="sidebar-link"><i class="fa-solid fa-circle-info"></i> About Us</a>
+      <a href="#" class="support-link" data-donate-trigger><i class="fa-solid fa-heart"></i> Support Us</a>
+      <a href="#" class="sidebar-link" id="logoutLink"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+    </nav>
+  </aside>
+
+  <main class="app-main">
+    <div class="topbar">
+      <button class="sidebar-toggle icon-btn" aria-label="Menu"><i class="fa-solid fa-bars"></i></button>
+      <div class="search-box"><i class="fa-solid fa-magnifying-glass"></i><input type="text" placeholder="Search for books, authors, categories..."></div>
+      <div class="topbar-user">
+        <button class="theme-toggle" data-theme-toggle title="Toggle dark mode"></button>
+        <div class="notif-wrap">
+          <button class="icon-btn" id="notifBtn"><i class="fa-regular fa-bell"></i><span class="dot"></span></button>
+        </div>
+        <div class="avatar" data-user-initials>SJ</div>
+      </div>
+    </div>
+
+    <div class="page-content">
+      <div class="section-head" style="margin-bottom:6px;">
+        <div><h1>My Books</h1><p class="page-sub" style="margin-bottom:0;">Books you've listed for sharing</p></div>
+        <a href="add-book.html" class="btn btn-primary btn-sm"><i class="fa-solid fa-plus"></i> Add Book</a>
+      </div>
+
+      <div class="panel" style="margin-top:20px;">
+        <div class="table-wrap">
+          <table class="data-table" id="myBooksTable">
+            <thead><tr><th>Book</th><th>Category</th><th>Condition</th><th>Status</th><th>Rating</th><th></th></tr></thead>
+            <tbody id="myBooksBody"></tbody>
+          </table>
+        </div>
+        <div id="emptyState"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="js/mock-data.js"></script>
+<script src="js/store.js"></script>
+<script src="js/api.js"></script>
+<script src="js/main.js"></script>
+<script>
+  requireAuth();
+
+  async function render() {
+    const books = await BookAPI.myBooks();
+    const body = document.getElementById("myBooksBody");
+    const empty = document.getElementById("emptyState");
+
+    if (!books.length) {
+      document.getElementById("myBooksTable").style.display = "none";
+      empty.innerHTML = `<div class="empty-state"><i class="fa-solid fa-book"></i><h3>No books listed yet</h3><p>Share a book from your shelf to get started.</p><a href="add-book.html" class="btn btn-primary" style="margin-top:16px;">Add Your First Book</a></div>`;
+      return;
+    }
+
+    document.getElementById("myBooksTable").style.display = "";
+    empty.innerHTML = "";
+    body.innerHTML = books.map((b) => `
+      <tr>
+        <td>
+          <span class="table-cover" style="${coverStyleAttr(b)}">${coverInnerHTML(b)}</span>
+          <div style="display:inline-block;vertical-align:middle;">
+            <div style="font-weight:600;">${b.title}</div>
+            <div style="font-size:12.5px;color:var(--brown-500);">${b.author}</div>
+          </div>
+        </td>
+        <td>${b.category}</td>
+        <td>${b.condition}</td>
+        <td><span class="availability-tag ${b.available ? "" : "unavailable"}">${b.available ? "Available" : "Borrowed"}</span></td>
+        <td>${b.rating ? `${b.rating} ★ (${b.reviews})` : "No ratings"}</td>
+        <td style="text-align:right;white-space:nowrap;">
+          <button class="btn btn-outline btn-sm" data-view="${b.id}">View</button>
+          <button class="btn btn-outline btn-sm" data-delete="${b.id}" style="color:var(--danger);border-color:var(--danger-bg);">Delete</button>
+        </td>
+      </tr>`).join("");
+  }
+
+  document.addEventListener("click", async (e) => {
+    const viewBtn = e.target.closest("[data-view]");
+    if (viewBtn) { window.location.href = `book-details.html?id=${viewBtn.dataset.view}`; return; }
+
+    const delBtn = e.target.closest("[data-delete]");
+    if (delBtn) {
+      if (!confirm("Remove this book listing? This can't be undone.")) return;
+      try {
+        await BookAPI.remove(delBtn.dataset.delete);
+        toast("Book removed.");
+        render();
+      } catch (err) { toast(err.message, "error"); }
+    }
+  });
+
+  render();
+</script>
+</body>
+</html>

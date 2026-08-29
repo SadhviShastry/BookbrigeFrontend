@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Requests — BookBridge</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+
+<div class="app-shell">
+  <aside class="sidebar">
+    <a href="index.html" class="brand"><span class="brand-mark"><i class="fa-solid fa-book-bookmark"></i></span> BookBridge</a>
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" data-nav="dashboard.html" class="sidebar-link"><i class="fa-solid fa-gauge"></i> Dashboard</a>
+      <a href="browse.html" data-nav="browse.html" class="sidebar-link"><i class="fa-solid fa-magnifying-glass"></i> Browse Books</a>
+      <a href="wishlist.html" data-nav="wishlist.html" class="sidebar-link"><i class="fa-solid fa-heart"></i> Wishlist</a>
+      <a href="requests.html" data-nav="requests.html" class="sidebar-link"><i class="fa-solid fa-inbox"></i> Requests</a>
+      <a href="my-books.html" data-nav="my-books.html" class="sidebar-link"><i class="fa-solid fa-book"></i> My Books</a>
+      <a href="add-book.html" data-nav="add-book.html" class="sidebar-link"><i class="fa-solid fa-plus"></i> Add Book</a>
+      <a href="messages.html" data-nav="messages.html" class="sidebar-link"><i class="fa-solid fa-message"></i> Messages</a>
+      <a href="membership.html" data-nav="membership.html" class="sidebar-link"><i class="fa-solid fa-crown"></i> Membership</a>
+      <a href="events.html" data-nav="events.html" class="sidebar-link"><i class="fa-solid fa-calendar-star"></i> Events &amp; Offers</a>
+      <div class="sidebar-divider"></div>
+      <a href="profile.html" data-nav="profile.html" class="sidebar-link"><i class="fa-solid fa-user"></i> Profile</a>
+      <a href="settings.html" data-nav="settings.html" class="sidebar-link"><i class="fa-solid fa-gear"></i> Settings</a>
+      <a href="admin.html" data-nav="admin.html" class="sidebar-link" data-admin-only style="display:none;"><i class="fa-solid fa-shield-halved"></i> Admin Panel</a>
+      <a href="about.html" data-nav="about.html" class="sidebar-link"><i class="fa-solid fa-circle-info"></i> About Us</a>
+      <a href="#" class="support-link" data-donate-trigger><i class="fa-solid fa-heart"></i> Support Us</a>
+      <a href="#" class="sidebar-link" id="logoutLink"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+    </nav>
+  </aside>
+
+  <main class="app-main">
+    <div class="topbar">
+      <button class="sidebar-toggle icon-btn" aria-label="Menu"><i class="fa-solid fa-bars"></i></button>
+      <div class="search-box"><i class="fa-solid fa-magnifying-glass"></i><input type="text" placeholder="Search for books, authors, categories..."></div>
+      <div class="topbar-user">
+        <button class="theme-toggle" data-theme-toggle title="Toggle dark mode"></button>
+        <div class="notif-wrap">
+          <button class="icon-btn" id="notifBtn"><i class="fa-regular fa-bell"></i><span class="dot"></span></button>
+        </div>
+        <div class="avatar" data-user-initials>SJ</div>
+      </div>
+    </div>
+
+    <div class="page-content">
+      <h1>Requests</h1>
+      <p class="page-sub">Track books you've requested and respond to requests on your listings</p>
+
+      <div class="tab-row">
+        <button class="tab-btn active" data-tab="sent">My Requests (Sent)</button>
+        <button class="tab-btn" data-tab="incoming">Incoming Requests</button>
+      </div>
+
+      <div class="panel" id="sentPanel"></div>
+      <div class="panel" id="incomingPanel" style="display:none;"></div>
+    </div>
+  </main>
+</div>
+
+<script src="js/mock-data.js"></script>
+<script src="js/store.js"></script>
+<script src="js/api.js"></script>
+<script src="js/main.js"></script>
+<script>
+  requireAuth();
+
+  document.querySelectorAll(".tab-btn").forEach((tab) => {
+    tab.addEventListener("click", () => {
+      document.querySelectorAll(".tab-btn").forEach((t) => t.classList.remove("active"));
+      tab.classList.add("active");
+      document.getElementById("sentPanel").style.display = tab.dataset.tab === "sent" ? "" : "none";
+      document.getElementById("incomingPanel").style.display = tab.dataset.tab === "incoming" ? "" : "none";
+    });
+  });
+
+  function rowHTML(r, mode) {
+    const badgeClass = r.status.toLowerCase();
+    let actions = "";
+    if (mode === "incoming" && r.status === "Pending") {
+      actions = `<button class="btn btn-primary btn-sm" data-accept="${r.id}">Accept</button>
+                 <button class="btn btn-outline btn-sm" data-reject="${r.id}" style="color:var(--danger);">Reject</button>`;
+    } else if (mode === "incoming" && r.status === "Accepted") {
+      actions = `<button class="btn btn-outline btn-sm" data-complete="${r.id}">Mark Returned</button>`;
+    } else {
+      actions = `<span class="mini-badge ${badgeClass}">${r.status}</span>`;
+    }
+    const dueDateHTML = r.dueDate && r.status === "Accepted"
+      ? `<div class="mini-book-sub" style="color:var(--pending);"><i class="fa-regular fa-clock"></i> Due ${new Date(r.dueDate).toLocaleDateString()}</div>` : "";
+    const contactHTML = r.status === "Accepted"
+      ? `<div class="contact-reveal" style="margin-top:8px;">
+          <div class="row"><span class="label">${mode === "sent" ? "Owner" : "Requester"}</span><span>${mode === "sent" ? r.ownerName : r.requesterName} · ${mode === "sent" ? r.ownerPhone : r.requesterPhone}</span></div>
+          ${r.isPurchase ? `<div class="row"><span class="label">Price / Payment</span><span>₹${r.price || 0} — ${r.paymentMethod || "—"}</span></div>` : ""}
+          ${r.deliveryAddress ? `<div class="row"><span class="label">Delivery Address</span><span>${r.deliveryAddress}</span></div>` : ""}
+        </div>` : "";
+    const receiptBtn = r.status === "Completed"
+      ? `<button class="btn btn-outline btn-sm" data-receipt="${r.id}"><i class="fa-solid fa-file-pdf"></i> Receipt</button>` : "";
+    return `
+      <div class="mini-book-row" style="padding:14px 0;flex-wrap:wrap;">
+        <a href="book-details.html?id=${r.bookId}" class="mini-cover" style="${r.book ? coverStyleAttr(r.book) : ""}">${r.book ? coverInnerHTML(r.book) : ""}</a>
+        <div style="flex:1;min-width:180px;">
+          <div class="mini-book-title">${r.book ? r.book.title : "Unknown book"}</div>
+          <div class="mini-book-sub">${mode === "sent" ? `Owner: ${r.ownerName}` : `Requested by: ${r.requesterName}`}</div>
+          ${dueDateHTML}
+          ${contactHTML}
+        </div>
+        <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
+          ${mode === "incoming" ? `<span class="mini-badge ${badgeClass}">${r.status}</span>` : ""}
+          ${receiptBtn}
+          ${actions}
+        </div>
+      </div>`;
+  }
+
+  async function render() {
+    const sent = await RequestAPI.myRequests();
+    document.getElementById("sentPanel").innerHTML = sent.length
+      ? sent.map((r) => rowHTML(r, "sent")).join("")
+      : `<div class="empty-state"><i class="fa-solid fa-inbox"></i><h3>No requests sent yet</h3><p>Browse the catalogue and request a book to see it here.</p></div>`;
+
+    const incoming = await RequestAPI.incoming();
+    document.getElementById("incomingPanel").innerHTML = incoming.length
+      ? incoming.map((r) => rowHTML(r, "incoming")).join("")
+      : `<div class="empty-state"><i class="fa-solid fa-hand-holding"></i><h3>No incoming requests</h3><p>When someone requests one of your books, it'll show up here.</p></div>`;
+  }
+
+  document.addEventListener("click", async (e) => {
+    const accept = e.target.closest("[data-accept]");
+    const reject = e.target.closest("[data-reject]");
+    const complete = e.target.closest("[data-complete]");
+    const receipt = e.target.closest("[data-receipt]");
+    try {
+      if (accept) { await RequestAPI.accept(accept.dataset.accept); toast("Request accepted!"); celebrate(); render(); }
+      if (reject) { await RequestAPI.reject(reject.dataset.reject); toast("Request rejected."); render(); }
+      if (complete) { await RequestAPI.complete(complete.dataset.complete); toast("Marked as returned — thanks!"); celebrate(); render(); }
+      if (receipt) { downloadReceipt(receipt.dataset.receipt); }
+    } catch (err) { toast(err.message, "error"); }
+  });
+
+  async function downloadReceipt(requestId) {
+    const all = [...(await RequestAPI.myRequests()), ...(await RequestAPI.incoming())];
+    const r = all.find((x) => String(x.id) === String(requestId));
+    if (!r) { toast("Couldn't find that exchange.", "error"); return; }
+
+    if (typeof window.jspdf === "undefined") {
+      await new Promise((resolve) => {
+        const s = document.createElement("script");
+        s.src = "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js";
+        s.onload = resolve;
+        document.body.appendChild(s);
+      });
+    }
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    doc.setFontSize(20); doc.setTextColor(193, 68, 14);
+    doc.text(`BookBridge — ${r.isPurchase ? "Purchase" : "Exchange"} Receipt`, 20, 25);
+    doc.setDrawColor(233, 220, 195); doc.line(20, 30, 190, 30);
+
+    doc.setFontSize(11); doc.setTextColor(60, 40, 25);
+    const lines = [
+      ["Book", r.book ? r.book.title : "-"],
+      ["Author", r.book ? r.book.author : "-"],
+      ["Owner", r.ownerName],
+      ["Borrower", r.requesterName],
+      ["Requested On", new Date(r.createdAt).toLocaleDateString()],
+      ["Due Date", r.dueDate ? new Date(r.dueDate).toLocaleDateString() : "-"],
+      ["Status", r.status],
+    ];
+    if (r.isPurchase) {
+      lines.push(["Price Paid", `₹${r.price || 0}`]);
+      lines.push(["Payment Method", r.paymentMethod || "-"]);
+      lines.push(["Delivery Address", r.deliveryAddress || "-"]);
+    }
+    lines.push(["Receipt Generated", new Date().toLocaleString()]);
+    let y = 45;
+    lines.forEach(([label, val]) => {
+      doc.setFont(undefined, "bold"); doc.text(`${label}:`, 20, y);
+      doc.setFont(undefined, "normal"); doc.text(String(val), 70, y);
+      y += 10;
+    });
+
+    doc.setFontSize(9); doc.setTextColor(140, 120, 100);
+    doc.text("This receipt confirms a book exchange coordinated via BookBridge.", 20, y + 10);
+
+    doc.save(`BookBridge-Receipt-${r.id}.pdf`);
+    toast("Receipt downloaded!");
+  }
+
+  render();
+</script>
+</body>
+</html>

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Profile — BookBridge</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+
+<div class="app-shell">
+  <aside class="sidebar">
+    <a href="index.html" class="brand"><span class="brand-mark"><i class="fa-solid fa-book-bookmark"></i></span> BookBridge</a>
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" data-nav="dashboard.html" class="sidebar-link"><i class="fa-solid fa-gauge"></i> Dashboard</a>
+      <a href="browse.html" data-nav="browse.html" class="sidebar-link"><i class="fa-solid fa-magnifying-glass"></i> Browse Books</a>
+      <a href="wishlist.html" data-nav="wishlist.html" class="sidebar-link"><i class="fa-solid fa-heart"></i> Wishlist</a>
+      <a href="requests.html" data-nav="requests.html" class="sidebar-link"><i class="fa-solid fa-inbox"></i> Requests</a>
+      <a href="my-books.html" data-nav="my-books.html" class="sidebar-link"><i class="fa-solid fa-book"></i> My Books</a>
+      <a href="add-book.html" data-nav="add-book.html" class="sidebar-link"><i class="fa-solid fa-plus"></i> Add Book</a>
+      <a href="messages.html" data-nav="messages.html" class="sidebar-link"><i class="fa-solid fa-message"></i> Messages</a>
+      <a href="membership.html" data-nav="membership.html" class="sidebar-link"><i class="fa-solid fa-crown"></i> Membership</a>
+      <a href="events.html" data-nav="events.html" class="sidebar-link"><i class="fa-solid fa-calendar-star"></i> Events &amp; Offers</a>
+      <div class="sidebar-divider"></div>
+      <a href="profile.html" data-nav="profile.html" class="sidebar-link"><i class="fa-solid fa-user"></i> Profile</a>
+      <a href="settings.html" data-nav="settings.html" class="sidebar-link"><i class="fa-solid fa-gear"></i> Settings</a>
+      <a href="admin.html" data-nav="admin.html" class="sidebar-link" data-admin-only style="display:none;"><i class="fa-solid fa-shield-halved"></i> Admin Panel</a>
+      <a href="about.html" data-nav="about.html" class="sidebar-link"><i class="fa-solid fa-circle-info"></i> About Us</a>
+      <a href="#" class="support-link" data-donate-trigger><i class="fa-solid fa-heart"></i> Support Us</a>
+      <a href="#" class="sidebar-link" id="logoutLink"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+    </nav>
+  </aside>
+
+  <main class="app-main">
+    <div class="topbar">
+      <button class="sidebar-toggle icon-btn" aria-label="Menu"><i class="fa-solid fa-bars"></i></button>
+      <div class="search-box"><i class="fa-solid fa-magnifying-glass"></i><input type="text" placeholder="Search for books, authors, categories..."></div>
+      <div class="topbar-user">
+        <button class="theme-toggle" data-theme-toggle title="Toggle dark mode"></button>
+        <div class="notif-wrap">
+          <button class="icon-btn" id="notifBtn"><i class="fa-regular fa-bell"></i><span class="dot"></span></button>
+        </div>
+        <div class="avatar" data-user-initials>SJ</div>
+      </div>
+    </div>
+
+    <div class="page-content" style="max-width:640px;">
+      <h1>My Profile</h1>
+      <p class="page-sub">Manage your public reader profile</p>
+
+      <div class="panel">
+        <div style="display:flex;align-items:center;gap:16px;margin-bottom:26px;">
+          <div class="avatar" style="width:64px;height:64px;font-size:22px;" data-user-initials>SJ</div>
+          <div>
+            <div style="font-weight:700;font-size:17px;" data-user-name>—</div>
+            <div style="font-size:13px;color:var(--brown-500);" id="memberSince">Member of BookBridge</div>
+          </div>
+        </div>
+
+        <div class="form-error-banner" id="profileError"></div>
+        <div class="form-error-banner success show" id="profileSuccess" style="display:none;background:var(--success-bg);color:var(--success);"></div>
+
+        <form id="profileForm">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="name">Full Name</label>
+              <input class="input" id="name" required>
+            </div>
+            <div class="form-group">
+              <label for="email">Email Address</label>
+              <input class="input" id="email" type="email" required>
+            </div>
+            <div class="form-group full">
+              <label for="phone">Phone Number</label>
+              <input class="input" id="phone">
+            </div>
+            <div class="form-group full">
+              <label for="area">Area / Locality</label>
+              <input class="input" id="area" placeholder="e.g. Andheri West, Mumbai">
+            </div>
+            <div class="form-group full">
+              <label for="bio">About You</label>
+              <textarea class="input" id="bio" placeholder="Tell the community a bit about your reading taste..."></textarea>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary" id="saveBtn" style="margin-top:6px;">Save Changes</button>
+        </form>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><h3>My Badges</h3></div>
+        <div class="badge-row" id="badgeRow"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="js/mock-data.js"></script>
+<script src="js/store.js"></script>
+<script src="js/api.js"></script>
+<script src="js/main.js"></script>
+<script>
+  requireAuth();
+
+  async function load() {
+    const user = await UserAPI.me();
+    document.getElementById("name").value = user.name || "";
+    document.getElementById("email").value = user.email || "";
+    document.getElementById("phone").value = user.phone || "";
+    document.getElementById("area").value = user.area || "";
+    document.getElementById("bio").value = user.bio || "";
+    document.getElementById("memberSince").textContent = `Member of BookBridge · ${user.role === "admin" ? "Administrator" : "Reader"}`;
+    renderBadges(document.getElementById("badgeRow"));
+  }
+
+  document.getElementById("profileForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const errBanner = document.getElementById("profileError");
+    const okBanner = document.getElementById("profileSuccess");
+    errBanner.classList.remove("show");
+    okBanner.style.display = "none";
+
+    const payload = {
+      name: document.getElementById("name").value.trim(),
+      email: document.getElementById("email").value.trim(),
+      phone: document.getElementById("phone").value.trim(),
+      area: document.getElementById("area").value.trim(),
+      bio: document.getElementById("bio").value.trim(),
+    };
+    if (!payload.name || !payload.email) {
+      errBanner.textContent = "Name and email are required.";
+      errBanner.classList.add("show");
+      return;
+    }
+
+    const btn = document.getElementById("saveBtn");
+    btn.disabled = true; btn.textContent = "Saving…";
+    try {
+      const updated = await UserAPI.update(payload);
+      const session = getCurrentUser();
+      setSession(getToken(), { ...session, ...updated });
+      okBanner.style.display = "block";
+      okBanner.textContent = "Profile updated successfully!";
+      paintUserChrome();
+      toast("Profile saved!");
+    } catch (err) {
+      errBanner.textContent = err.message;
+      errBanner.classList.add("show");
+    } finally {
+      btn.disabled = false; btn.textContent = "Save Changes";
+    }
+  });
+
+  load();
+</script>
+</body>
+</html>

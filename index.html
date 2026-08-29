@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BookBridge — Share Books. Inspire Readers.</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="index.html" class="brand"><span class="brand-mark"><i class="fa-solid fa-book-bookmark"></i></span> BookBridge</a>
+    <div class="nav-links">
+      <a href="index.html" data-nav="index.html" class="active">Home</a>
+      <a href="browse.html" data-nav="browse.html">Browse</a>
+      <a href="browse.html#categories">Categories</a>
+      <a href="membership.html" data-nav="membership.html">Membership</a>
+      <a href="events.html" data-nav="events.html">Events</a>
+      <a href="about.html" data-nav="about.html">About</a>
+      <a href="#contact">Contact</a>
+    </div>
+    <div class="nav-actions" id="navActions">
+      <button class="theme-toggle" data-theme-toggle title="Toggle dark mode"></button>
+      <a href="login.html" class="btn btn-outline btn-sm hide-mobile">Login</a>
+      <a href="register.html" class="btn btn-primary btn-sm">Sign Up</a>
+      <button class="nav-toggle" aria-label="Menu"><i class="fa-solid fa-bars"></i></button>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-bookline"></div>
+  <div class="container hero-grid">
+    <div>
+      <span class="eyebrow">Community Reading Ecosystem</span>
+      <h1 style="margin-top:10px;">Share Books.<span class="accent">Inspire Readers.</span></h1>
+      <p>Exchange, borrow, and donate books within your trusted community — no clutter, no cost, just readers helping readers.</p>
+      <div class="hero-actions">
+        <a href="browse.html" class="btn btn-primary">Browse Books</a>
+        <a href="register.html" class="btn btn-outline">Join Community</a>
+      </div>
+    </div>
+   <div class="hero-photowall">
+      <img src="https://images.unsplash.com/photo-1512820790803-83ca734da794?w=400&q=80" alt="Stack of books">
+      <img src="https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400&q=80" alt="Open book close-up">
+      <img src="https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=400&q=80" alt="Books on a shelf">
+      <img src="https://images.unsplash.com/photo-1495446815901-a7297e633e8d?w=400&q=80" alt="Person reading a book">
+      <img src="https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=400&q=80" alt="Colorful book spines">
+      <img src="https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400&q=80" alt="Books stacked with plant">
+   </div>
+  </div>
+
+  <div class="container" style="position:relative;z-index:1;">
+    <div class="stats-strip glass">
+      <div class="stat-item">
+        <span class="stat-icon"><i class="fa-solid fa-book"></i></span>
+        <div><div class="stat-num" data-count="1500" data-suffix="+">0</div><div class="stat-label">Books Shared</div></div>
+      </div>
+      <div class="stat-item">
+        <span class="stat-icon"><i class="fa-solid fa-users"></i></span>
+        <div><div class="stat-num" data-count="800" data-suffix="+">0</div><div class="stat-label">Active Readers</div></div>
+      </div>
+      <div class="stat-item">
+        <span class="stat-icon"><i class="fa-solid fa-right-left"></i></span>
+        <div><div class="stat-num" data-count="450" data-suffix="+">0</div><div class="stat-label">Successful Exchanges</div></div>
+      </div>
+      <div class="stat-item">
+        <span class="stat-icon"><i class="fa-solid fa-earth-asia"></i></span>
+        <div><div class="stat-num" data-count="100" data-suffix="+">0</div><div class="stat-label">Communities</div></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <h2>Discover Your Next Read</h2>
+      <a href="browse.html" class="link-view-all">View All →</a>
+    </div>
+    <div class="book-grid" id="homeBookGrid"></div>
+  </div>
+</section>
+
+<section class="section" id="categories">
+  <div class="container">
+    <div class="section-head"><h2>Popular Categories</h2></div>
+    <div class="category-grid" id="categoryGrid"></div>
+  </div>
+</section>
+
+<section class="section" id="about">
+  <div class="container">
+    <div class="section-head"><h2>How BookBridge Works</h2></div>
+    <div class="steps-row">
+      <div class="step-connector"></div>
+      <div class="step-item">
+        <div class="step-circle"><i class="fa-solid fa-user-plus"></i></div>
+        <div class="step-title">1. Register</div>
+        <div class="step-desc">Create your free account in seconds</div>
+      </div>
+      <div class="step-item">
+        <div class="step-circle"><i class="fa-solid fa-upload"></i></div>
+        <div class="step-title">2. Upload Book</div>
+        <div class="step-desc">Add books you want to share</div>
+      </div>
+      <div class="step-item">
+        <div class="step-circle"><i class="fa-solid fa-inbox"></i></div>
+        <div class="step-title">3. Receive Request</div>
+        <div class="step-desc">Readers request your book</div>
+      </div>
+      <div class="step-item">
+        <div class="step-circle"><i class="fa-solid fa-hourglass-half"></i></div>
+        <div class="step-title">4. Exchange</div>
+        <div class="step-desc">Handover and enjoy your new read</div>
+      </div>
+      <div class="step-item">
+        <div class="step-circle"><i class="fa-solid fa-star"></i></div>
+        <div class="step-title">5. Review</div>
+        <div class="step-desc">Rate and review for the community</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer" id="contact">
+  <div class="container">
+    &copy; 2026 BookBridge — Connecting readers through sharing, borrowing, and exchanging books sustainably.
+    <div style="margin-top:10px;">
+      <a href="about.html" class="link-accent" style="margin-right:18px;">About Us</a>
+      <a href="#" data-donate-trigger class="link-accent"><i class="fa-solid fa-heart"></i> Support Us</a>
+    </div>
+  </div>
+</footer>
+
+<script src="js/mock-data.js"></script>
+<script src="js/store.js"></script>
+<script src="js/api.js"></script>
+<script src="js/main.js"></script>
+<script>
+  async function renderHome() {
+    const books = await BookAPI.list({ limit: 4 });
+    document.getElementById("homeBookGrid").innerHTML = books.map(bookCardHTML).join("");
+
+    const categories = await BookAPI.categories();
+    const CAT_COLORS = ["#C1440E", "#3A6B7A", "#6E7A4A", "#A8501F", "#7A3B69", "#B8862E", "#2E6B5E", "#4A5A8C"];
+    document.getElementById("categoryGrid").innerHTML = categories.map((c, i) => `
+      <a href="browse.html?category=${encodeURIComponent(c.name)}" class="category-card" style="--cat-color:${CAT_COLORS[i % CAT_COLORS.length]};">
+        <div class="category-icon"><i class="fa-solid ${c.icon}"></i></div>
+        <div class="category-name">${c.name}</div>
+      </a>`).join("");
+  }
+  renderHome();
+
+  if (isLoggedIn()) {
+    document.getElementById("navActions").innerHTML = `
+      <button class="theme-toggle" data-theme-toggle title="Toggle dark mode"></button>
+      <a href="${isAdmin() ? "admin.html" : "dashboard.html"}" class="btn btn-primary btn-sm">Go to Dashboard</a>
+      <button class="nav-toggle" aria-label="Menu"><i class="fa-solid fa-bars"></i></button>`;
+  }
+</script>
+</body>
+</html>

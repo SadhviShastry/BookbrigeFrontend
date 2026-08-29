@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — BookBridge</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+
+<div class="app-shell">
+  <aside class="sidebar">
+    <a href="index.html" class="brand"><span class="brand-mark"><i class="fa-solid fa-book-bookmark"></i></span> BookBridge</a>
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" data-nav="dashboard.html" class="sidebar-link"><i class="fa-solid fa-gauge"></i> Dashboard</a>
+      <a href="browse.html" data-nav="browse.html" class="sidebar-link"><i class="fa-solid fa-magnifying-glass"></i> Browse Books</a>
+      <a href="wishlist.html" data-nav="wishlist.html" class="sidebar-link"><i class="fa-solid fa-heart"></i> Wishlist</a>
+      <a href="requests.html" data-nav="requests.html" class="sidebar-link"><i class="fa-solid fa-inbox"></i> Requests</a>
+      <a href="my-books.html" data-nav="my-books.html" class="sidebar-link"><i class="fa-solid fa-book"></i> My Books</a>
+      <a href="add-book.html" data-nav="add-book.html" class="sidebar-link"><i class="fa-solid fa-plus"></i> Add Book</a>
+      <a href="messages.html" data-nav="messages.html" class="sidebar-link"><i class="fa-solid fa-message"></i> Messages</a>
+      <a href="membership.html" data-nav="membership.html" class="sidebar-link"><i class="fa-solid fa-crown"></i> Membership</a>
+      <a href="events.html" data-nav="events.html" class="sidebar-link"><i class="fa-solid fa-calendar-star"></i> Events &amp; Offers</a>
+      <div class="sidebar-divider"></div>
+      <a href="profile.html" data-nav="profile.html" class="sidebar-link"><i class="fa-solid fa-user"></i> Profile</a>
+      <a href="settings.html" data-nav="settings.html" class="sidebar-link"><i class="fa-solid fa-gear"></i> Settings</a>
+      <a href="admin.html" data-nav="admin.html" class="sidebar-link" data-admin-only style="display:none;"><i class="fa-solid fa-shield-halved"></i> Admin Panel</a>
+      <a href="about.html" data-nav="about.html" class="sidebar-link"><i class="fa-solid fa-circle-info"></i> About Us</a>
+      <a href="#" class="support-link" data-donate-trigger><i class="fa-solid fa-heart"></i> Support Us</a>
+      <a href="#" class="sidebar-link" id="logoutLink"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+    </nav>
+  </aside>
+
+  <main class="app-main">
+    <div class="topbar">
+      <button class="sidebar-toggle icon-btn" aria-label="Menu"><i class="fa-solid fa-bars"></i></button>
+      <div class="search-box">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" placeholder="Search for books, authors, categories...">
+      </div>
+      <div class="topbar-user">
+        <button class="theme-toggle" data-theme-toggle title="Toggle dark mode"></button>
+        <div class="notif-wrap">
+          <button class="icon-btn" id="notifBtn"><i class="fa-regular fa-bell"></i><span class="dot"></span></button>
+        </div>
+        <div class="avatar" data-user-initials>SJ</div>
+      </div>
+    </div>
+
+    <div class="page-content">
+      <h1>Welcome back, <span data-user-name>there</span> 👋</h1>
+      <p class="page-sub">Here's what's happening in your library</p>
+
+      <div class="kpi-grid" id="kpiGrid"></div>
+
+      <div class="dash-grid">
+        <div>
+          <div class="panel">
+            <div class="panel-head">
+              <h3>Recently Added Books</h3>
+              <a href="browse.html" class="link-view-all">View All</a>
+            </div>
+            <div class="mini-grid" id="recentGrid"></div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head">
+              <h3>Wishlist</h3>
+              <a href="wishlist.html" class="link-view-all">View All</a>
+            </div>
+            <div class="mini-grid" id="wishlistGrid"></div>
+          </div>
+        </div>
+
+        <div>
+          <div class="panel">
+            <div class="panel-head">
+              <h3><i class="fa-solid fa-book-open" style="color:var(--clay);margin-right:6px;"></i>Currently Borrowed</h3>
+              <a href="requests.html" class="link-view-all">View All</a>
+            </div>
+            <div id="borrowedList"></div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head">
+              <h3>My Requests</h3>
+              <a href="requests.html" class="link-view-all">View All</a>
+            </div>
+            <div id="requestsList"></div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head"><h3>Recommended for You</h3></div>
+            <div class="mini-grid" id="recommendedGrid"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="js/mock-data.js"></script>
+<script src="js/store.js"></script>
+<script src="js/api.js"></script>
+<script src="js/main.js"></script>
+<script>
+  requireAuth();
+
+  function miniCoverHTML(book, className = "mini-cover") {
+    return `<a href="book-details.html?id=${book.id}" class="${className}" style="${coverStyleAttr(book)}" title="${book.title}">${coverInnerHTML(book)}</a>`;
+  }
+
+  async function renderDashboard() {
+    document.getElementById("recentGrid").innerHTML = skeletonCards(4);
+    document.getElementById("wishlistGrid").innerHTML = skeletonCards(4);
+    document.getElementById("recommendedGrid").innerHTML = skeletonCards(4);
+
+    const stats = await DashboardAPI.summary();
+    document.getElementById("kpiGrid").innerHTML = `
+      <div class="kpi-card"><span class="kpi-icon"><i class="fa-solid fa-book"></i></span><div><div class="kpi-num">${stats.booksShared}</div><div class="kpi-label">Books Shared</div></div></div>
+      <div class="kpi-card"><span class="kpi-icon"><i class="fa-solid fa-hand-holding-heart"></i></span><div><div class="kpi-num">${stats.booksBorrowed}</div><div class="kpi-label">Books Borrowed</div></div></div>
+      <div class="kpi-card"><span class="kpi-icon"><i class="fa-solid fa-clock"></i></span><div><div class="kpi-num">${stats.pendingRequests}</div><div class="kpi-label">Pending Requests</div></div></div>
+      <div class="kpi-card"><span class="kpi-icon"><i class="fa-solid fa-star"></i></span><div><div class="kpi-num">${stats.reviewsGiven}</div><div class="kpi-label">Reviews Given</div></div></div>
+    `;
+
+    const allBooks = await BookAPI.list();
+
+    const recent = allBooks.slice(0, 4);
+    document.getElementById("recentGrid").innerHTML = recent.length ? recent.map((b) => `
+      <div>
+        ${miniCoverHTML(b, "mini-grid-cover")}
+        <div class="mini-book-title" style="margin-top:6px;">${b.title}</div>
+        <div class="mini-book-sub">${b.author}</div>
+      </div>`).join("") : `<p style="color:var(--brown-500);font-size:13px;">No books yet.</p>`;
+
+    const wishlist = await WishlistAPI.list();
+    document.getElementById("wishlistGrid").innerHTML = wishlist.length ? wishlist.slice(0, 4).map((b) => `
+      <div>
+        ${miniCoverHTML(b, "mini-grid-cover")}
+        <div class="mini-book-title" style="margin-top:6px;">${b.title}</div>
+        <div class="mini-book-sub">${b.author}</div>
+      </div>`).join("") : `<p style="color:var(--brown-500);font-size:13px;">Your wishlist is empty — <a href="browse.html" class="link-accent">browse books</a>.</p>`;
+
+    const recommended = allBooks.slice(4, 8);
+    document.getElementById("recommendedGrid").innerHTML = recommended.map((b) => `
+      <div>
+        ${miniCoverHTML(b, "mini-grid-cover")}
+        <div class="mini-book-title" style="margin-top:6px;">${b.title}</div>
+        <div class="mini-book-sub">${b.author}</div>
+      </div>`).join("");
+
+    const requests = await RequestAPI.myRequests();
+    document.getElementById("requestsList").innerHTML = requests.length ? requests.slice(0, 5).map((r) => `
+      <div class="mini-book-row">
+        ${r.book ? miniCoverHTML(r.book) : ""}
+        <div>
+          <div class="mini-book-title">${r.book ? r.book.title : "Unknown book"}</div>
+          <div class="mini-book-sub">${r.book ? r.book.author : ""}</div>
+        </div>
+        <span class="mini-badge ${r.status.toLowerCase()}">${r.status}</span>
+      </div>`).join("") : `<p style="color:var(--brown-500);font-size:13px;">No requests yet — <a href="browse.html" class="link-accent">find a book to borrow</a>.</p>`;
+
+    const borrowed = await RequestAPI.borrowed();
+    document.getElementById("borrowedList").innerHTML = borrowed.length ? borrowed.slice(0, 5).map((r) => `
+      <div class="mini-book-row">
+        ${r.book ? miniCoverHTML(r.book) : ""}
+        <div>
+          <div class="mini-book-title">${r.book ? r.book.title : "Unknown book"}</div>
+          <div class="mini-book-sub">${r.book ? r.book.author : ""} · Due ${r.dueDate ? new Date(r.dueDate).toLocaleDateString() : "—"}</div>
+        </div>
+      </div>`).join("") : `<p style="color:var(--brown-500);font-size:13px;">Nothing borrowed right now.</p>`;
+  }
+
+  renderDashboard();
+</script>
+</body>
+</html>

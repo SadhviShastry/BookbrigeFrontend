@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Panel — BookBridge</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+
+<div class="app-shell">
+  <aside class="sidebar">
+    <a href="index.html" class="brand"><span class="brand-mark"><i class="fa-solid fa-book-bookmark"></i></span> BookBridge</a>
+    <nav class="sidebar-nav">
+      <a href="#" class="sidebar-link active" data-admin-tab="overview"><i class="fa-solid fa-shield-halved"></i> Admin Overview</a>
+      <a href="#" class="sidebar-link" data-admin-tab="exchanges"><i class="fa-solid fa-truck-fast"></i> Exchange Coordination</a>
+      <a href="#" class="sidebar-link" data-admin-tab="categories"><i class="fa-solid fa-tags"></i> Categories</a>
+      <a href="#" class="sidebar-link" data-admin-tab="donations"><i class="fa-solid fa-heart"></i> Donations</a>
+      <a href="#" class="sidebar-link" data-admin-tab="activity"><i class="fa-solid fa-list-check"></i> Activity Log</a>
+      <a href="browse.html" data-nav="browse.html" class="sidebar-link"><i class="fa-solid fa-magnifying-glass"></i> Browse Books</a>
+      <div class="sidebar-divider"></div>
+      <a href="profile.html" data-nav="profile.html" class="sidebar-link"><i class="fa-solid fa-user"></i> Profile</a>
+      <a href="#" class="sidebar-link" id="logoutLink"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+    </nav>
+  </aside>
+
+  <main class="app-main">
+    <div class="topbar">
+      <button class="sidebar-toggle icon-btn" aria-label="Menu"><i class="fa-solid fa-bars"></i></button>
+      <div style="font-weight:700;" id="topbarTitle">Admin Panel</div>
+      <div class="topbar-user">
+        <button class="theme-toggle" data-theme-toggle title="Toggle dark mode"></button>
+        <div class="notif-wrap">
+          <button class="icon-btn" id="notifBtn"><i class="fa-regular fa-bell"></i><span class="dot"></span></button>
+        </div>
+        <span class="role-pill admin">ADMIN</span>
+        <div class="avatar" data-user-initials>AD</div>
+      </div>
+    </div>
+
+    <div class="page-content">
+
+      <!-- ===== OVERVIEW TAB ===== -->
+      <div id="tab-overview">
+        <h1>Platform Overview</h1>
+        <p class="page-sub">Monitor and moderate the BookBridge community</p>
+
+        <div class="kpi-grid" id="kpiGrid"></div>
+
+        <div class="panel">
+          <div class="panel-head"><h3>Manage Users</h3></div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th>Name</th><th>Email</th><th>Role</th><th></th></tr></thead>
+              <tbody id="usersBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head"><h3>Manage Book Listings</h3></div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th>Book</th><th>Category</th><th>Owner</th><th>Status</th><th></th></tr></thead>
+              <tbody id="booksBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== EXCHANGE COORDINATION TAB ===== -->
+      <div id="tab-exchanges" style="display:none;">
+        <h1>Exchange Coordination</h1>
+        <p class="page-sub">Contact both parties and track handover/delivery for accepted exchanges</p>
+        <div id="exchangesList"></div>
+      </div>
+
+      <!-- ===== CATEGORIES TAB ===== -->
+      <div id="tab-categories" style="display:none;">
+        <h1>Category Management</h1>
+        <p class="page-sub">Add, and remove book categories used across the platform</p>
+
+        <div class="panel">
+          <div class="panel-head"><h3>Add New Category</h3></div>
+          <div class="form-error-banner" id="catError"></div>
+          <div class="form-grid">
+            <div class="form-group"><label for="catName">Category Name</label><input class="input" id="catName" placeholder="e.g. Mystery"></div>
+            <div class="form-group">
+              <label for="catIcon">Icon</label>
+              <select class="select" id="catIcon">
+                <option value="fa-book">📖 Book (default)</option>
+                <option value="fa-code">💻 Code</option>
+                <option value="fa-feather">✒️ Feather</option>
+                <option value="fa-briefcase">💼 Briefcase</option>
+                <option value="fa-graduation-cap">🎓 Graduation Cap</option>
+                <option value="fa-seedling">🌱 Seedling</option>
+                <option value="fa-layer-group">📚 Layers</option>
+                <option value="fa-ghost">👻 Ghost</option>
+                <option value="fa-heart">❤️ Heart</option>
+                <option value="fa-flask">🧪 Flask</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn btn-primary" id="addCategoryBtn">Add Category</button>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head"><h3>Existing Categories</h3></div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th>Icon</th><th>Name</th><th>Books Listed</th><th></th></tr></thead>
+              <tbody id="categoriesBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== DONATIONS TAB ===== -->
+      <div id="tab-donations" style="display:none;">
+        <h1>Donations</h1>
+        <p class="page-sub">Every "Support Us" contribution, with the optional message left by the donor</p>
+        <div class="kpi-grid" id="donationKpiGrid"></div>
+        <div class="panel">
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th>Donor</th><th>Amount</th><th>Message</th><th>Date</th></tr></thead>
+              <tbody id="donationsBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== ACTIVITY LOG TAB ===== -->
+      <div id="tab-activity" style="display:none;">
+        <h1>Activity Log</h1>
+        <p class="page-sub">Every action performed on the platform — registrations, listings, requests, reviews, donations, memberships</p>
+        <div class="panel" id="activityPanel"></div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="js/mock-data.js"></script>
+<script src="js/store.js"></script>
+<script src="js/api.js"></script>
+<script src="js/main.js"></script>
+<script>
+  requireAdmin();
+
+  /* ---------------- Tab switching ---------------- */
+  const TAB_TITLES = { overview: "Admin Panel", exchanges: "Exchange Coordination", categories: "Category Management", donations: "Donations", activity: "Activity Log" };
+  function showTab(tab) {
+    ["overview", "exchanges", "categories", "donations", "activity"].forEach((t) => {
+      document.getElementById(`tab-${t}`).style.display = t === tab ? "" : "none";
+    });
+    document.querySelectorAll("[data-admin-tab]").forEach((el) => el.classList.toggle("active", el.dataset.adminTab === tab));
+    document.getElementById("topbarTitle").textContent = TAB_TITLES[tab];
+    if (tab === "overview") renderOverview();
+    if (tab === "exchanges") renderExchanges();
+    if (tab === "categories") renderCategories();
+    if (tab === "donations") renderDonations();
+    if (tab === "activity") renderActivity();
+  }
+  document.querySelectorAll("[data-admin-tab]").forEach((el) => {
+    el.addEventListener("click", (e) => { e.preventDefault(); showTab(el.dataset.adminTab); });
+  });
+
+  /* ---------------- Overview ---------------- */
+  async function renderOverview() {
+    const stats = await AdminAPI.stats();
+    document.getElementById("kpiGrid").innerHTML = `
+      <div class="kpi-card"><span class="kpi-icon"><i class="fa-solid fa-users"></i></span><div><div class="kpi-num">${stats.totalUsers}</div><div class="kpi-label">Registered Users</div></div></div>
+      <div class="kpi-card"><span class="kpi-icon"><i class="fa-solid fa-book"></i></span><div><div class="kpi-num">${stats.totalBooks}</div><div class="kpi-label">Book Listings</div></div></div>
+      <div class="kpi-card"><span class="kpi-icon"><i class="fa-solid fa-clock"></i></span><div><div class="kpi-num">${stats.pendingRequests}</div><div class="kpi-label">Pending Requests</div></div></div>
+      <div class="kpi-card"><span class="kpi-icon"><i class="fa-solid fa-right-left"></i></span><div><div class="kpi-num">${stats.totalExchanges}</div><div class="kpi-label">Completed Exchanges</div></div></div>
+    `;
+
+    const users = await AdminAPI.users();
+    document.getElementById("usersBody").innerHTML = users.map((u) => `
+      <tr>
+        <td style="font-weight:600;">${u.name}</td>
+        <td>${u.email}</td>
+        <td><span class="role-pill ${u.role === "admin" ? "admin" : ""}">${u.role.toUpperCase()}</span></td>
+        <td style="text-align:right;">
+          ${u.role !== "admin" ? `<button class="btn btn-outline btn-sm" data-remove-user="${u.id}" style="color:var(--danger);border-color:var(--danger-bg);">Remove</button>` : ""}
+        </td>
+      </tr>`).join("");
+
+    const books = await AdminAPI.books();
+    document.getElementById("booksBody").innerHTML = books.map((b) => `
+      <tr>
+        <td>
+          <span class="table-cover" style="${coverStyleAttr(b)}">${coverInnerHTML(b)}</span>
+          <span style="vertical-align:middle;font-weight:600;">${b.title}</span>
+        </td>
+        <td>${b.category}</td>
+        <td>${b.owner}</td>
+        <td><span class="availability-tag ${b.available ? "" : "unavailable"}">${b.available ? "Available" : "Borrowed"}</span></td>
+        <td style="text-align:right;">
+          <button class="btn btn-outline btn-sm" data-remove-book="${b.id}" style="color:var(--danger);border-color:var(--danger-bg);">Remove</button>
+        </td>
+      </tr>`).join("");
+  }
+
+  document.addEventListener("click", async (e) => {
+    const ru = e.target.closest("[data-remove-user]");
+    const rb = e.target.closest("[data-remove-book]");
+    if (ru) {
+      if (!confirm("Remove this user? This cannot be undone.")) return;
+      await AdminAPI.removeUser(ru.dataset.removeUser);
+      toast("User removed.");
+      renderOverview();
+    }
+    if (rb) {
+      if (!confirm("Remove this book listing?")) return;
+      await AdminAPI.removeBook(rb.dataset.removeBook);
+      toast("Listing removed.");
+      renderOverview();
+    }
+  });
+
+  /* ---------------- Exchange Coordination ---------------- */
+  const DELIVERY_STEPS = ["Awaiting Pickup", "Packaging", "In Transit", "Delivered"];
+
+  function deliveryStepperHTML(current) {
+    const idx = DELIVERY_STEPS.indexOf(current);
+    return `<div class="delivery-stepper">${DELIVERY_STEPS.map((s, i) => `
+      <div class="delivery-step ${i < idx ? "done" : ""} ${i === idx ? "current" : ""}">${s}</div>`).join("")}</div>`;
+  }
+
+  async function renderExchanges() {
+    const list = document.getElementById("exchangesList");
+    const exchanges = await AdminAPI.acceptedExchanges();
+    if (!exchanges.length) {
+      list.innerHTML = `<div class="empty-state"><i class="fa-solid fa-truck-fast"></i><h3>No active exchanges</h3><p>Accepted borrow requests will show up here for coordination.</p></div>`;
+      return;
+    }
+    list.innerHTML = exchanges.map((r) => `
+      <div class="panel">
+        <div class="panel-head">
+          <h3>${r.book ? r.book.title : "Unknown book"}</h3>
+          <span class="mini-badge ${r.status.toLowerCase()}">${r.status}</span>
+        </div>
+
+        <div class="form-grid" style="margin-bottom:18px;">
+          <div>
+            <div class="label" style="font-size:12.5px;color:var(--brown-500);">Owner (Lender)</div>
+            <div style="font-weight:600;">${r.ownerName}</div>
+            <div style="font-size:13px;color:var(--brown-700);">${r.ownerEmail} · ${r.ownerPhone}</div>
+          </div>
+          <div>
+            <div class="label" style="font-size:12.5px;color:var(--brown-500);">Requester (Borrower)</div>
+            <div style="font-weight:600;">${r.requesterName}</div>
+            <div style="font-size:13px;color:var(--brown-700);">${r.requesterEmail} · ${r.requesterPhone}</div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;">
+          <a class="btn btn-outline btn-sm" href="mailto:${r.ownerEmail},${r.requesterEmail}?subject=BookBridge Exchange — ${encodeURIComponent(r.book ? r.book.title : "")}&body=Hi both, coordinating the handover for this exchange."><i class="fa-solid fa-envelope"></i> Email Both Parties</a>
+          <a class="btn btn-outline btn-sm" href="tel:${r.ownerPhone}"><i class="fa-solid fa-phone"></i> Call Owner</a>
+          <a class="btn btn-outline btn-sm" href="tel:${r.requesterPhone}"><i class="fa-solid fa-phone"></i> Call Requester</a>
+        </div>
+
+        ${deliveryStepperHTML(r.deliveryStatus || "Awaiting Pickup")}
+
+        <div class="form-grid" style="margin-top:16px;">
+          <div class="form-group">
+            <label>Delivery Status</label>
+            <select class="select" data-delivery-status="${r.id}">
+              ${DELIVERY_STEPS.map((s) => `<option ${r.deliveryStatus === s ? "selected" : ""}>${s}</option>`).join("")}
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Delivery Partner</label>
+            <select class="select" data-delivery-partner="${r.id}">
+              ${["Self Pickup", "Delivery Partner", "Courier"].map((s) => `<option ${r.deliveryPartner === s ? "selected" : ""}>${s}</option>`).join("")}
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Tracking ID</label>
+            <input class="input" data-tracking-id="${r.id}" value="${r.trackingId || ""}" placeholder="e.g. DLV123456">
+          </div>
+          <div class="form-group full">
+            <label>Internal Notes</label>
+            <textarea class="input" data-admin-notes="${r.id}" placeholder="e.g. Courier scheduled for Friday">${r.adminNotes || ""}</textarea>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-sm" data-save-delivery="${r.id}">Save Update</button>
+      </div>`).join("");
+  }
+
+  document.addEventListener("click", async (e) => {
+    const saveBtn = e.target.closest("[data-save-delivery]");
+    if (!saveBtn) return;
+    const id = saveBtn.dataset.saveDelivery;
+    const payload = {
+      deliveryStatus: document.querySelector(`[data-delivery-status="${id}"]`).value,
+      deliveryPartner: document.querySelector(`[data-delivery-partner="${id}"]`).value,
+      trackingId: document.querySelector(`[data-tracking-id="${id}"]`).value,
+      adminNotes: document.querySelector(`[data-admin-notes="${id}"]`).value,
+    };
+    try {
+      await RequestAPI.updateDelivery(id, payload);
+      toast("Delivery status updated.");
+      renderExchanges();
+    } catch (err) { toast(err.message, "error"); }
+  });
+
+  /* ---------------- Categories ---------------- */
+  async function renderCategories() {
+    const cats = await CategoryAPI.list();
+    const books = await AdminAPI.books();
+    document.getElementById("categoriesBody").innerHTML = cats.map((c) => {
+      const count = books.filter((b) => b.category === c.name).length;
+      return `
+        <tr>
+          <td><i class="fa-solid ${c.icon}" style="color:var(--clay);"></i></td>
+          <td style="font-weight:600;">${c.name}</td>
+          <td>${count} book${count === 1 ? "" : "s"}</td>
+          <td style="text-align:right;">
+            <button class="btn btn-outline btn-sm" data-remove-cat="${c.id}" style="color:var(--danger);border-color:var(--danger-bg);">Delete</button>
+          </td>
+        </tr>`;
+    }).join("");
+  }
+
+  document.getElementById("addCategoryBtn").addEventListener("click", async () => {
+    const banner = document.getElementById("catError");
+    banner.classList.remove("show");
+    const name = document.getElementById("catName").value.trim();
+    const icon = document.getElementById("catIcon").value;
+    if (!name) { banner.textContent = "Please enter a category name."; banner.classList.add("show"); return; }
+    try {
+      await CategoryAPI.create(name, icon);
+      document.getElementById("catName").value = "";
+      toast("Category added!");
+      renderCategories();
+    } catch (err) { banner.textContent = err.message; banner.classList.add("show"); }
+  });
+
+  document.addEventListener("click", async (e) => {
+    const rc = e.target.closest("[data-remove-cat]");
+    if (!rc) return;
+    try {
+      await CategoryAPI.remove(rc.dataset.removeCat);
+      toast("Category removed.");
+      renderCategories();
+    } catch (err) { toast(err.message, "error"); }
+  });
+
+  /* ---------------- Donations ---------------- */
+  async function renderDonations() {
+    const donations = await DonationAPI.list();
+    const total = donations.reduce((s, d) => s + d.amount, 0);
+    document.getElementById("donationKpiGrid").innerHTML = `
+      <div class="kpi-card"><span class="kpi-icon"><i class="fa-solid fa-indian-rupee-sign"></i></span><div><div class="kpi-num">₹${total}</div><div class="kpi-label">Total Raised</div></div></div>
+      <div class="kpi-card"><span class="kpi-icon"><i class="fa-solid fa-heart"></i></span><div><div class="kpi-num">${donations.length}</div><div class="kpi-label">Contributions</div></div></div>
+    `;
+    document.getElementById("donationsBody").innerHTML = donations.length ? donations.map((d) => `
+      <tr>
+        <td style="font-weight:600;">${d.userName}</td>
+        <td>₹${d.amount}</td>
+        <td style="color:var(--brown-500);">${d.message || "—"}</td>
+        <td>${timeAgo(d.date)}</td>
+      </tr>`).join("") : `<tr><td colspan="4" style="text-align:center;color:var(--brown-500);padding:24px;">No donations yet.</td></tr>`;
+  }
+
+  /* ---------------- Activity Log ---------------- */
+  const ACTIVITY_ICONS = { user_registered: "fa-user-plus", book_listed: "fa-book", request_created: "fa-inbox", request_status: "fa-right-left", review_added: "fa-star", donation: "fa-heart", membership: "fa-crown" };
+  async function renderActivity() {
+    const items = await AdminAPI.activity();
+    document.getElementById("activityPanel").innerHTML = items.length ? items.map((a) => `
+      <div class="activity-item">
+        <span class="activity-dot"></span>
+        <div><i class="fa-solid ${ACTIVITY_ICONS[a.type] || "fa-circle-info"}" style="color:var(--clay);margin-right:6px;"></i>${a.text}<div class="activity-time">${timeAgo(a.date)}</div></div>
+      </div>`).join("") : `<div class="empty-state"><i class="fa-solid fa-list-check"></i><p>No activity recorded yet.</p></div>`;
+  }
+
+  showTab("overview");
+</script>
+</body>
+</html>

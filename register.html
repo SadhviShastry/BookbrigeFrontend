@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Create Account — BookBridge</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+
+<div class="auth-wrap">
+  <div class="auth-panel">
+    <div class="auth-box">
+      <a href="index.html" class="brand"><span class="brand-mark"><i class="fa-solid fa-book-bookmark"></i></span> BookBridge</a>
+      <h1>Create Account</h1>
+      <p class="sub">Join our community of readers</p>
+
+      <div class="form-error-banner" id="registerError"></div>
+
+      <form id="registerForm" novalidate>
+        <div class="form-group">
+          <label for="fullName">Full Name</label>
+          <input class="input" type="text" id="fullName" placeholder="Enter your full name" required>
+          <div class="field-error" id="fullNameError">Please enter your full name.</div>
+        </div>
+
+        <div class="form-group">
+          <label for="regEmail">Email Address</label>
+          <input class="input" type="email" id="regEmail" placeholder="youremail@example.com" required>
+          <div class="field-error" id="regEmailError">Please enter a valid email address.</div>
+        </div>
+
+        <div class="form-group">
+          <label for="phone">Phone Number</label>
+          <input class="input" type="tel" id="phone" placeholder="Enter your phone number" required>
+          <div class="field-error" id="phoneError">Please enter a valid 10-digit phone number.</div>
+        </div>
+
+        <div class="form-group">
+          <label for="area">Area / Locality</label>
+          <input class="input" id="area" placeholder="e.g. Andheri West, Mumbai">
+          <div class="field-error" id="areaError" style="display:none;"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="regPassword">Password</label>
+          <div class="input-wrap">
+            <input class="input" type="password" id="regPassword" placeholder="••••••••" required minlength="6">
+            <button type="button" class="toggle-visibility" data-toggle-for="regPassword"><i class="fa-regular fa-eye"></i></button>
+          </div>
+          <div class="pw-meter" id="pwMeter"></div>
+          <div class="field-error" id="regPasswordError">Password must be at least 6 characters.</div>
+        </div>
+
+        <div class="form-group">
+          <label for="confirmPassword">Confirm Password</label>
+          <div class="input-wrap">
+            <input class="input" type="password" id="confirmPassword" placeholder="••••••••" required>
+            <button type="button" class="toggle-visibility" data-toggle-for="confirmPassword"><i class="fa-regular fa-eye"></i></button>
+          </div>
+          <div class="field-error" id="confirmPasswordError">Passwords do not match.</div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block" id="registerBtn" style="margin-top:6px;">Register</button>
+      </form>
+
+      <p class="auth-footer">Already have an account? <a href="login.html" class="link-accent">Login</a></p>
+    </div>
+  </div>
+
+  <div class="auth-art">
+    <div class="quote">
+      "Books are a uniquely portable magic."
+      <span>— Start sharing and borrowing in your own community today</span>
+    </div>
+  </div>
+</div>
+
+<script src="js/mock-data.js"></script>
+<script src="js/store.js"></script>
+<script src="js/api.js"></script>
+<script src="js/main.js"></script>
+<script>
+  wirePasswordStrength("regPassword", "pwMeter");
+
+  document.querySelectorAll("[data-toggle-for]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const input = document.getElementById(btn.dataset.toggleFor);
+      const icon = btn.querySelector("i");
+      const show = input.type === "password";
+      input.type = show ? "text" : "password";
+      icon.className = show ? "fa-regular fa-eye-slash" : "fa-regular fa-eye";
+    });
+  });
+
+  function validEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
+  function validPhone(v) { return /^\d{10}$/.test(v.replace(/\D/g, "")); }
+
+  document.getElementById("registerForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const fullName = document.getElementById("fullName").value.trim();
+    const email = document.getElementById("regEmail").value.trim();
+    const phone = document.getElementById("phone").value.trim();
+    const area = document.getElementById("area").value.trim();
+    const password = document.getElementById("regPassword").value;
+    const confirm = document.getElementById("confirmPassword").value;
+
+    const errors = {
+      fullNameError: fullName.length < 2,
+      regEmailError: !validEmail(email),
+      phoneError: !validPhone(phone),
+      regPasswordError: password.length < 6,
+      confirmPasswordError: password !== confirm || confirm.length === 0,
+    };
+
+    Object.entries(errors).forEach(([id, hasError]) => {
+      document.getElementById(id).classList.toggle("show", hasError);
+    });
+
+    const banner = document.getElementById("registerError");
+    banner.classList.remove("show");
+    if (Object.values(errors).some(Boolean)) return;
+
+    const btn = document.getElementById("registerBtn");
+    btn.disabled = true;
+    btn.textContent = "Creating account…";
+
+    try {
+      const result = await AuthAPI.register({ fullName, email, phone, area, password });
+      setSession(result.token, result.user);
+      toast("Account created! Welcome to BookBridge.");
+      setTimeout(() => (window.location.href = "dashboard.html"), 600);
+    } catch (err) {
+      banner.textContent = err.message || "Something went wrong. Please try again.";
+      banner.classList.add("show");
+      btn.disabled = false;
+      btn.textContent = "Register";
+    }
+  });
+</script>
+</body>
+</html>
