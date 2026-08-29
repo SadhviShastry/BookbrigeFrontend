@@ -24,8 +24,6 @@ function hashCode(str) {
 }
 
 const MOCK_BOOKS = [
-  { id: 1, title: "Atomic Habits", author: "James Clear", rating: 4.8, reviews: 120, category: "Self Help", available: true, condition: "Like New", owner: "Sarah Johnson", desc: "Tiny changes, remarkable results. This book offers a proven framework for improving every day.", imageUrl: "assets/images.jpg" },
-  { id: 2, title: "The Alchemist", author: "Paulo Coelho", rating: 4.7, reviews: 98, category: "Novels", available: true, condition: "Good", owner: "Rahul Patel", desc: "A shepherd boy's journey to fulfil his personal legend, exploring destiny and self-discovery.", imageUrl: "assets/download.jpg" },
   { id: 3, title: "Rich Dad Poor Dad", author: "Robert Kiyosaki", rating: 4.6, reviews: 87, category: "Business", available: true, condition: "Good", owner: "Aisha Khan", desc: "What the rich teach their kids about money that the poor and middle class do not.", imageUrl: "assets/richdadpoordad.jpg" },
   { id: 4, title: "The 5 AM Club", author: "Robin Sharma", rating: 4.9, reviews: 110, category: "Self Help", available: true, condition: "New", owner: "Meera Nair", desc: "Own your morning, elevate your life — a story-driven guide to early rising and discipline.", imageUrl: "assets/5amclub.jpg" },
   { id: 5, title: "Sapiens", author: "Yuval Noah Harari", rating: 4.8, reviews: 143, category: "Academic", available: true, condition: "Like New", owner: "Karan Mehta", desc: "A brief history of humankind, from the Stone Age to the modern era.", imageUrl: "assets/sapiens.png" },
