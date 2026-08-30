@@ -122,17 +122,38 @@
   document.getElementById("sendBtn").addEventListener("click", sendMessage);
   document.getElementById("chatInput").addEventListener("keydown", (e) => { if (e.key === "Enter") sendMessage(); });
 
-  async function sendMessage() {
-    const input = document.getElementById("chatInput");
-    const text = input.value.trim();
-    if (!text || !activeThreadId) return;
-    input.value = "";
-    try {
-      await MessageAPI.send(activeThreadId, text);
-      const threads = await MessageAPI.threads();
-      renderThreads();
-    } catch (err) { toast(err.message, "error"); }
+ async function sendMessage() {
+  const input = document.getElementById("chatInput");
+  const sendBtn = document.getElementById("sendBtn");
+  const text = input.value.trim();
+  if (!text || !activeThreadId) return;
+
+  input.value = "";
+  input.disabled = true;
+  sendBtn.disabled = true;
+
+  // Optimistic UI: show the message immediately, before the server confirms it.
+  const body = document.getElementById("chatBody");
+  const placeholder = document.createElement("div");
+  placeholder.className = "chat-bubble mine";
+  placeholder.style.opacity = "0.6";
+  placeholder.textContent = text;
+  body.appendChild(placeholder);
+  body.scrollTop = body.scrollHeight;
+
+  try {
+    await MessageAPI.send(activeThreadId, text);
+    const threads = await MessageAPI.threads();
+    renderThreads();
+  } catch (err) {
+    placeholder.remove();
+    toast(err.message, "error");
+  } finally {
+    input.disabled = false;
+    sendBtn.disabled = false;
+    input.focus();
   }
+}
 
   renderThreads();
 </script>
