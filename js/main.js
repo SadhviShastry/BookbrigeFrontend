@@ -300,7 +300,9 @@ function celebrate() {
 
 /* ======================= Notifications dropdown ======================= */
 function timeAgo(iso) {
-  const diff = (Date.now() - new Date(iso).getTime()) / 1000;
+  if (!iso) return "";
+  const hasTz = /Z$|[+-]\d\d:\d\d$/.test(iso);
+  const diff = (Date.now() - new Date(hasTz ? iso : iso + "Z").getTime()) / 1000;
   if (diff < 60) return "Just now";
   if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
   if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
