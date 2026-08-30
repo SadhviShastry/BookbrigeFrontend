@@ -363,7 +363,7 @@
         <td style="font-weight:600;">${d.userName}</td>
         <td>₹${d.amount}</td>
         <td style="color:var(--brown-500);">${d.message || "—"}</td>
-        <td>${timeAgo(d.date)}</td>
+       <td>${timeAgo(d.date || d.createdAt)}</td>
       </tr>`).join("") : `<tr><td colspan="4" style="text-align:center;color:var(--brown-500);padding:24px;">No donations yet.</td></tr>`;
   }
 
@@ -374,7 +374,7 @@
     document.getElementById("activityPanel").innerHTML = items.length ? items.map((a) => `
       <div class="activity-item">
         <span class="activity-dot"></span>
-        <div><i class="fa-solid ${ACTIVITY_ICONS[a.type] || "fa-circle-info"}" style="color:var(--clay);margin-right:6px;"></i>${a.text}<div class="activity-time">${timeAgo(a.date)}</div></div>
+        <div><i class="fa-solid ${ACTIVITY_ICONS[a.type] || "fa-circle-info"}" style="color:var(--clay);margin-right:6px;"></i>${a.text}<div class="activity-time">${timeAgo(a.date || a.createdAt)}</div></div>
       </div>`).join("") : `<div class="empty-state"><i class="fa-solid fa-list-check"></i><p>No activity recorded yet.</p></div>`;
   }
 

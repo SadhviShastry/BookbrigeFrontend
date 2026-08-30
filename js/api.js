@@ -166,9 +166,9 @@ const ReviewAPI = {
 const MessageAPI = {
   threads: () => withStore(() => request("/messages/threads"), () => Store.getThreads(currentUserId())),
   startThread: (ownerId, bookId) => withStore(
-    () => request("/messages/threads", { method: "POST", body: { ownerId, bookId } }),
-    () => Store.startThread(currentUserId(), ownerId, bookId)
-  ),
+  () => request("/messages/threads", { method: "POST", body: { ownerId, bookId } }).then(r => r.id),
+  () => Store.startThread(currentUserId(), ownerId, bookId)
+),
   messages: (threadId) => withStore(() => request(`/messages/threads/${threadId}`), () => Store.getMessages(threadId)),
   send: (threadId, text) => withStore(
     () => request(`/messages/threads/${threadId}`, { method: "POST", body: { text } }),
