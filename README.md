@@ -58,33 +58,6 @@ bookbridge-frontend/
 └── .vscode/                # Live Server config
 ```
 
-## 🖥️ Running Locally
-
-1. Clone this repo:
-   ```bash
-   git clone https://github.com/SadhviShastry/bookbridge-frontend.git
-   ```
-2. Open the folder in **VS Code**.
-3. Install the **Live Server** extension (VS Code will prompt you automatically).
-4. Right-click `index.html` → **"Open with Live Server"**.
-5. That's it — no build step, no `npm install`.
-
-By default, the frontend points at the **live deployed backend** (`js/api.js`). If the backend is unreachable, it transparently falls back to a local mock store so the app still works end-to-end for development/demo purposes.
-
-## 🔌 Connecting to Your Own Backend
-
-In `js/api.js`, update:
-```js
-const API_BASE = "https://bookbridge-backend-vrkx.onrender.com/api";
-```
-to point at your own backend URL if you're running a separate instance.
-
-## 🔑 Demo Credentials
-
-| Role | Email | Password |
-|---|---|---|
-| Admin | `admin@bookbridge.com` | *(change after first login)* |
-
 ## 📦 Related Repository
 
 This frontend is powered by a Java Spring Boot + MySQL backend:
