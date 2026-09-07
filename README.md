@@ -1,4 +1,4 @@
-# 📖 BookBridge — Frontend
+# 📖 BookBridge  Frontend
 
 > Share, borrow, donate, exchange, or sell books within your community.
 
@@ -14,22 +14,22 @@
 
 ## ✨ What is BookBridge?
 
-BookBridge is a community book-sharing platform. Instead of letting a book sit unread on a shelf, users can **lend, borrow, donate, exchange, or sell** it to someone nearby who'll actually read it. This repository is the **frontend** — a lightweight, framework-free HTML/CSS/JavaScript application that talks to the [BookBridge Spring Boot backend](https://github.com/SadhviShastry/bookbridge-backend).
+BookBridge is a community book sharing platform. Instead of letting a book sit unread on a shelf, users can **lend, borrow, donate, exchange, or sell** it to someone nearby who'll actually read it. This repository is the **frontend**  a lightweight, framework free HTML/CSS/JavaScript application that talks to the [BookBridge Spring Boot backend](https://github.com/SadhviShastry/bookbridge-backend).
 
 ## 🚀 Features
 
 - 🔐 JWT-based authentication (user & admin login)
-- 📚 Book listings — Lend, Donate, Exchange, or **Sell** (with price + payment method)
+- 📚 Book listings  Lend, Donate, Exchange, or **Sell** (with price + payment method)
 - 🔍 Search, filter, and autocomplete on the Browse page
 - 📩 Borrow/purchase requests with a full lifecycle: `Pending → Accepted/Rejected → Completed`
 - 💬 In-app messaging between book owner and requester
-- 🔔 Real-time-style in-app notifications
+- 🔔 Real-time-style in app notifications
 - ⭐ Reviews & ratings on completed exchanges
 - 🧾 **Auto-generated PDF receipts** for every completed exchange
 - 🏅 Badges, rewards, and community **membership tiers**
 - 📅 Community **events & donation drives**
 - 🌗 Dark mode
-- 🛠️ Full **Admin Dashboard** — user/listing moderation, exchange & delivery coordination, category management, donation tracking, and a platform-wide activity log
+- 🛠️ Full **Admin Dashboard**  user/listing moderation, exchange & delivery coordination, category management, donation tracking, and a platform-wide activity log
 
 ## 🧱 Tech Stack
 
@@ -65,8 +65,8 @@ This frontend is powered by a Java Spring Boot + MySQL backend:
 
 ## 👩‍💻 Author
 
-Built by **Sadhvi Shastry** as a full-stack mini project — K. C. College of Engineering and Management Studies & Research, Department of Information Technology.
+Built by **Sadhvi Shastry** as a full-stack mini project   K. C. College of Engineering and Management Studies & Research, Department of Information Technology.
 
 ---
 
-<p align="center">Made with 📖 and a lot of ☕ — BookBridge, 2026</p>
+<p align="center">Made with 📖 and a lot of ☕  BookBridge, 2026</p>
